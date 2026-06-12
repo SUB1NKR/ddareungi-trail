@@ -25,7 +25,7 @@ const menuDuration = 780;
   BX사이트000.webp ~ BX사이트361.webp = 362
   BX사이트000.webp ~ BX사이트499.webp = 500
 */
-const frameCount = 100;
+const frameCount = 101;
 const frameStartIndex = 0;
 const framePath = "./assets/frames/";
 const framePrefix = "BX사이트";

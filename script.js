@@ -19,13 +19,15 @@ const menuDuration = 780;
 
 /*
   프레임 이미지 설정
-  사진을 더 추가하면 frameCount만 바꾸면 됩니다.
 
-  예:
-  BX사이트000.webp ~ BX사이트361.webp = 362
-  BX사이트000.webp ~ BX사이트499.webp = 500
+  현재:
+  BX사이트000.webp ~ BX사이트361.webp = 362장
+
+  나중에 500장으로 늘리면:
+  BX사이트000.webp ~ BX사이트499.webp까지 넣고
+  frameCount만 500으로 바꾸면 됩니다.
 */
-const frameCount = 363;
+const frameCount = 362;
 const frameStartIndex = 0;
 const framePath = "./assets/frames/";
 const framePrefix = "BX사이트";
@@ -38,15 +40,6 @@ const frameExtension = ".webp";
 const autoPlayEndFrame = 150;
 const autoPlayDuration = 5000;
 
-/*
-  휠 / 키보드 / 터치 감도
-  너무 빠르면 wheelSensitivity와 maxWheelDelta를 더 낮추면 됩니다.
-*/
-const wheelSensitivity = 0.00012;
-const maxWheelDelta = 0.006;
-const keyStep = 0.006;
-const touchSensitivity = 0.00035;
-
 let currentSlideIndex = 0;
 let slideTimer = null;
 let scrollGuideTimer = null;
@@ -55,10 +48,11 @@ let isPageReady = false;
 let isMenuOpen = false;
 let isMenuClosing = false;
 let isAutoPlaying = false;
+let isRestoringScroll = false;
 
-let progress = 0;
 let currentFrameIndex = -1;
-let touchStartY = 0;
+let lastScrollY = 0;
+let lockedScrollY = 0;
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -73,8 +67,68 @@ function getFrameSrc(index) {
   return `${framePath}${framePrefix}${frameNumber}${frameExtension}`;
 }
 
-function shouldBlockFrameControl() {
+function getMaxScroll() {
+  return Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+}
+
+function getScrollProgress() {
+  return clamp(window.scrollY / getMaxScroll(), 0, 1);
+}
+
+function getScrollYByFrame(frameIndex) {
+  const progress = frameIndex / (frameCount - 1);
+  return getMaxScroll() * progress;
+}
+
+function shouldLockActualScroll() {
   return !isPageReady || isMenuOpen || isMenuClosing || isAutoPlaying;
+}
+
+function saveLockedScrollPosition() {
+  lockedScrollY = window.scrollY;
+}
+
+function preventActualScroll(event) {
+  if (!shouldLockActualScroll()) return;
+  event.preventDefault();
+}
+
+function preventScrollKey(event) {
+  if (!shouldLockActualScroll()) return;
+
+  const scrollKeys = [
+    "ArrowUp",
+    "ArrowDown",
+    "PageUp",
+    "PageDown",
+    "Home",
+    "End",
+    " "
+  ];
+
+  if (scrollKeys.includes(event.key)) {
+    event.preventDefault();
+  }
+}
+
+function restoreLockedScroll() {
+  if (!shouldLockActualScroll()) return;
+  if (isRestoringScroll) return;
+  if (window.scrollY === lockedScrollY) return;
+
+  isRestoringScroll = true;
+  window.scrollTo(0, lockedScrollY);
+
+  requestAnimationFrame(() => {
+    isRestoringScroll = false;
+  });
+}
+
+function startScrollLockWatch() {
+  window.addEventListener("wheel", preventActualScroll, { passive: false });
+  window.addEventListener("touchmove", preventActualScroll, { passive: false });
+  window.addEventListener("keydown", preventScrollKey);
+  window.addEventListener("scroll", restoreLockedScroll);
 }
 
 function preloadFrames() {
@@ -97,9 +151,34 @@ function setFrame(index) {
   updateEndCta();
 }
 
-function updateFrame() {
-  const nextFrameIndex = Math.round(progress * (frameCount - 1));
-  setFrame(nextFrameIndex);
+function updateFrameByScroll() {
+  if (!isPageReady || isAutoPlaying) return;
+
+  const progress = getScrollProgress();
+  const frameIndex = Math.round(progress * (frameCount - 1));
+
+  setFrame(frameIndex);
+
+  if (frameIndex < frameCount - 1) {
+    hideScrollGuide();
+    restartScrollGuideTimer();
+  }
+}
+
+function updateGnbByScrollDirection() {
+  if (!gnb || !isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return;
+
+  const currentScrollY = window.scrollY;
+
+  if (Math.abs(currentScrollY - lastScrollY) < 4) return;
+
+  if (currentScrollY > lastScrollY) {
+    hideGnbByDirection();
+  } else {
+    showGnbByDirection();
+  }
+
+  lastScrollY = currentScrollY;
 }
 
 function updateEndCta() {
@@ -116,16 +195,6 @@ function updateEndCta() {
   endCta.setAttribute("aria-hidden", "true");
 }
 
-function changeProgress(delta) {
-  progress = clamp(progress + delta, 0, 1);
-  updateFrame();
-
-  if (currentFrameIndex < frameCount - 1) {
-    hideScrollGuide();
-    restartScrollGuideTimer();
-  }
-}
-
 function hideGnbByDirection() {
   if (!gnb || isMenuOpen || isMenuClosing) return;
 
@@ -140,106 +209,27 @@ function showGnbByDirection() {
   gnb.classList.add("is-visible");
 }
 
-function handleWheel(event) {
-  event.preventDefault();
-
-  if (shouldBlockFrameControl()) return;
-
-  const isScrollDown = event.deltaY > 0;
-  const isScrollUp = event.deltaY < 0;
-
-  if (isScrollDown) {
-    hideGnbByDirection();
-  }
-
-  if (isScrollUp) {
-    showGnbByDirection();
-  }
-
-  const rawDelta = event.deltaY * wheelSensitivity;
-  const limitedDelta = clamp(rawDelta, -maxWheelDelta, maxWheelDelta);
-
-  changeProgress(limitedDelta);
-}
-
-function handleKeydown(event) {
-  const nextKeys = ["ArrowDown", "PageDown", " "];
-  const prevKeys = ["ArrowUp", "PageUp"];
-  const controlKeys = [...nextKeys, ...prevKeys, "Home", "End"];
-
-  if (!controlKeys.includes(event.key)) return;
-
-  event.preventDefault();
-
-  if (shouldBlockFrameControl()) return;
-
-  if (nextKeys.includes(event.key)) {
-    hideGnbByDirection();
-    changeProgress(keyStep);
-  }
-
-  if (prevKeys.includes(event.key)) {
-    showGnbByDirection();
-    changeProgress(-keyStep);
-  }
-
-  if (event.key === "Home") {
-    progress = 0;
-    showGnbByDirection();
-    updateFrame();
-    showScrollGuide();
-  }
-
-  if (event.key === "End") {
-    progress = 1;
-    hideGnbByDirection();
-    updateFrame();
-  }
-}
-
-function handleTouchStart(event) {
-  if (!event.touches || event.touches.length === 0) return;
-  touchStartY = event.touches[0].clientY;
-}
-
-function handleTouchMove(event) {
-  event.preventDefault();
-
-  if (shouldBlockFrameControl()) return;
-  if (!event.touches || event.touches.length === 0) return;
-
-  const currentY = event.touches[0].clientY;
-  const deltaY = touchStartY - currentY;
-
-  touchStartY = currentY;
-
-  if (deltaY > 0) {
-    hideGnbByDirection();
-  }
-
-  if (deltaY < 0) {
-    showGnbByDirection();
-  }
-
-  changeProgress(deltaY * touchSensitivity);
-}
-
 function startFrameSequence() {
   if (!frameImage) return;
+
+  window.scrollTo(0, 0);
+  lastScrollY = 0;
+  lockedScrollY = 0;
 
   setFrame(0);
   preloadFrames();
 
-  window.addEventListener("wheel", handleWheel, { passive: false });
-  window.addEventListener("keydown", handleKeydown);
-  window.addEventListener("touchstart", handleTouchStart, { passive: false });
-  window.addEventListener("touchmove", handleTouchMove, { passive: false });
+  window.addEventListener("scroll", () => {
+    updateFrameByScroll();
+    updateGnbByScrollDirection();
+  });
 
   startIntroAutoPlay();
 }
 
 function startIntroAutoPlay() {
   isAutoPlaying = true;
+  saveLockedScrollPosition();
   hideScrollGuide();
 
   const startTime = performance.now();
@@ -248,7 +238,6 @@ function startIntroAutoPlay() {
     const elapsed = currentTime - startTime;
     const rawProgress = clamp(elapsed / autoPlayDuration, 0, 1);
     const easedProgress = easeInOutCubic(rawProgress);
-
     const frameIndex = Math.round(easedProgress * autoPlayEndFrame);
 
     setFrame(frameIndex);
@@ -258,10 +247,15 @@ function startIntroAutoPlay() {
       return;
     }
 
-    progress = autoPlayEndFrame / (frameCount - 1);
-    setFrame(autoPlayEndFrame);
+    const targetScrollY = getScrollYByFrame(autoPlayEndFrame);
 
     isAutoPlaying = false;
+    window.scrollTo(0, targetScrollY);
+
+    lastScrollY = targetScrollY;
+    lockedScrollY = targetScrollY;
+
+    setFrame(autoPlayEndFrame);
     showScrollGuide();
     restartScrollGuideTimer();
   }
@@ -270,6 +264,8 @@ function startIntroAutoPlay() {
 }
 
 function startLoading() {
+  saveLockedScrollPosition();
+
   adaptivePopup.classList.add("is-hidden");
 
   setTimeout(() => {
@@ -345,6 +341,8 @@ function openMenu() {
   isMenuOpen = true;
   isMenuClosing = false;
 
+  saveLockedScrollPosition();
+
   document.body.classList.add("is-menu-open");
   document.body.classList.remove("is-menu-closing");
 
@@ -354,6 +352,7 @@ function openMenu() {
   menuButton.classList.add("is-open");
   menuButton.setAttribute("aria-label", "메뉴 닫기");
 
+  showGnb();
   hideScrollGuide();
 }
 
@@ -384,6 +383,9 @@ function finishCloseMenu(callback) {
 
   document.body.classList.remove("is-menu-closing");
 
+  window.scrollTo(0, lockedScrollY);
+  lastScrollY = lockedScrollY;
+
   showGnb();
 
   if (typeof callback === "function") {
@@ -403,8 +405,9 @@ function moveToHome(event) {
   event.preventDefault();
 
   closeMenu(() => {
-    progress = 0;
-    isAutoPlaying = false;
+    window.scrollTo(0, 0);
+    lastScrollY = 0;
+    lockedScrollY = 0;
     setFrame(0);
     showGnb();
     showScrollGuide();
@@ -431,6 +434,9 @@ function restartScrollGuideTimer() {
 
   scrollGuideTimer = setTimeout(showScrollGuide, 5000);
 }
+
+saveLockedScrollPosition();
+startScrollLockWatch();
 
 menuButton?.addEventListener("click", toggleMenu);
 

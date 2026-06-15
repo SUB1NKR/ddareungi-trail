@@ -16,6 +16,10 @@ const endCta = document.querySelector("#endCta");
 const slideInterval = 2000;
 const totalLoadingTime = slides.length * slideInterval;
 const menuDuration = 780;
+const externalNotice = document.querySelector("#externalNotice");
+const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+
+const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 /*
   프레임 이미지 설정
@@ -476,3 +480,17 @@ menuButton?.addEventListener("click", toggleMenu);
 document.querySelector("[data-home-link]")?.addEventListener("click", moveToHome);
 
 startButton?.addEventListener("click", startLoading);
+
+courseIndexExternalLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+
+  if (isMenuOpen) {
+    closeMenu(() => {
+      showExternalNoticeAndMove(courseIndexUrl);
+    });
+
+    return;
+  }
+
+  showExternalNoticeAndMove(courseIndexUrl);
+});

@@ -1145,3 +1145,53 @@ body.is-menu-closing .gnb-menu-button span {
     transform: translateY(0);
   }
 }
+/* =========================
+   8차 수정사항 : 클릭 먹통 해결
+========================= */
+
+/* 배경 롤링 이미지와 딤 레이어는 클릭을 막지 않게 처리 */
+.rolling-gallery,
+.rolling-row,
+.rolling-track,
+.rolling-track img,
+.intro-dim {
+  pointer-events: none;
+}
+
+/* GNB와 메뉴 버튼은 항상 클릭 가능하게 최상단 유지 */
+.site-gnb {
+  z-index: 9600;
+  pointer-events: auto;
+}
+
+.gnb-logo,
+.gnb-menu-button {
+  position: relative;
+  z-index: 9700;
+  pointer-events: auto;
+}
+
+/* 인트로 카드와 버튼 클릭 우선순위 올리기 */
+.intro-card {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.intro-card button,
+.intro-card a,
+.primary-button {
+  position: relative;
+  z-index: 21;
+  pointer-events: auto;
+}
+
+/* 메뉴 패널이 열렸을 때는 메뉴 클릭 가능 */
+.menu-panel.is-open {
+  pointer-events: auto;
+}
+
+.menu-panel.is-open .menu-link,
+.menu-panel.is-open .menu-sns-link {
+  pointer-events: auto;
+}

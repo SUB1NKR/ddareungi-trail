@@ -12,6 +12,10 @@ const menuPanel = document.querySelector("#menuPanel");
 const scrollGuide = document.querySelector("#scrollGuide");
 const frameImage = document.querySelector("#frameImage");
 const endCta = document.querySelector("#endCta");
+const externalNotice = document.querySelector("#externalNotice");
+const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+
+const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 const slideInterval = 2000;
 const totalLoadingTime = slides.length * slideInterval;
@@ -478,6 +482,19 @@ startScrollProtection();
 menuButton?.addEventListener("click", toggleMenu);
 
 document.querySelector("[data-home-link]")?.addEventListener("click", moveToHome);
+courseIndexExternalLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+
+  if (isMenuOpen) {
+    closeMenu(() => {
+      showExternalNoticeAndMove(courseIndexUrl);
+    });
+
+    return;
+  }
+
+  showExternalNoticeAndMove(courseIndexUrl);
+});
 
 startButton?.addEventListener("click", startLoading);
 

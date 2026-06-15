@@ -9,31 +9,23 @@ const gnb = document.querySelector("#gnb");
 const menuButton = document.querySelector("#menuButton");
 const menuPanel = document.querySelector("#menuPanel");
 
+const introVideo = document.querySelector("#introVideo");
 const scrollGuide = document.querySelector("#scrollGuide");
 const frameImage = document.querySelector("#frameImage");
 const endCta = document.querySelector("#endCta");
+
 const externalNotice = document.querySelector("#externalNotice");
 const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
-
-const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 const slideInterval = 2000;
 const totalLoadingTime = slides.length * slideInterval;
 const menuDuration = 780;
-const externalNotice = document.querySelector("#externalNotice");
-const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
 
 const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 /*
   프레임 이미지 설정
-
-  현재:
   BX사이트000.webp ~ BX사이트361.webp = 362장
-
-  나중에:
-  BX사이트000.webp ~ BX사이트499.webp = 500장
-  → frameCount를 500으로 변경
 */
 const frameCount = 362;
 const frameStartIndex = 0;
@@ -42,20 +34,19 @@ const framePrefix = "BX사이트";
 const frameExtension = ".webp";
 
 /*
-  자동재생 설정
-  0번부터 150번까지 5초 동안 자동재생
+  영상 종료 후 스크롤 프레임 시작 위치
+  영상 마지막 장면이 BX사이트150.webp 근처와 이어진다는 전제
 */
-const autoPlayEndFrame = 150;
-const autoPlayDuration = 5000;
+const scrollStartFrame = 150;
 
 let currentSlideIndex = 0;
 let slideTimer = null;
 let scrollGuideTimer = null;
 
 let isPageReady = false;
+let isVideoPlaying = false;
 let isMenuOpen = false;
 let isMenuClosing = false;
-let isAutoPlaying = false;
 
 let currentFrameIndex = -1;
 let lastScrollY = 0;
@@ -88,15 +79,8 @@ function getScrollProgress() {
   return clamp(window.scrollY / maxScroll, 0, 1);
 }
 
-function getScrollYByFrame(frameIndex) {
-  const maxScroll = getMaxScroll();
-  const progress = frameIndex / (frameCount - 1);
-
-  return maxScroll * progress;
-}
-
 function preloadFrames() {
-  for (let index = 0; index < frameCount; index += 1) {
+  for (let index = scrollStartFrame; index < frameCount; index += 1) {
     const image = new Image();
     image.src = getFrameSrc(index);
   }
@@ -116,10 +100,11 @@ function setFrame(index) {
 }
 
 function updateFrameByScroll() {
-  if (!isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return;
+  if (!isPageReady || isVideoPlaying || isMenuOpen || isMenuClosing) return;
 
   const progress = getScrollProgress();
-  const frameIndex = Math.round(progress * (frameCount - 1));
+  const frameRange = frameCount - 1 - scrollStartFrame;
+  const frameIndex = scrollStartFrame + Math.round(progress * frameRange);
 
   setFrame(frameIndex);
 }
@@ -156,7 +141,7 @@ function hideGnb() {
 }
 
 function updateGnbByScrollDirection() {
-  if (!gnb || !isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return;
+  if (!gnb || !isPageReady || isVideoPlaying || isMenuOpen || isMenuClosing) return;
 
   const currentScrollY = window.scrollY;
 
@@ -174,7 +159,7 @@ function updateGnbByScrollDirection() {
 }
 
 function showScrollGuide() {
-  if (!scrollGuide || isMenuOpen || isMenuClosing || isAutoPlaying) return;
+  if (!scrollGuide || isMenuOpen || isMenuClosing || isVideoPlaying) return;
   if (currentFrameIndex >= frameCount - 1) return;
 
   scrollGuide.classList.add("is-visible");
@@ -195,14 +180,14 @@ function restartScrollGuideTimer() {
 }
 
 function updateScrollGuideByUserScroll() {
-  if (!isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return;
+  if (!isPageReady || isVideoPlaying || isMenuOpen || isMenuClosing) return;
 
   hideScrollGuide();
   restartScrollGuideTimer();
 }
 
 function shouldLockPageScroll() {
-  return !isPageReady || isMenuOpen || isMenuClosing || isAutoPlaying;
+  return !isPageReady || isMenuOpen || isMenuClosing || isVideoPlaying;
 }
 
 function saveLockedScrollPosition() {
@@ -276,58 +261,83 @@ function setScrollWithoutLock(y) {
   });
 }
 
-function startIntroAutoPlay() {
-  isAutoPlaying = true;
-  saveLockedScrollPosition();
-  hideScrollGuide();
-
-  const startTime = performance.now();
-
-  function animate(currentTime) {
-    const elapsed = currentTime - startTime;
-    const rawProgress = clamp(elapsed / autoPlayDuration, 0, 1);
-    const easedProgress = easeInOutCubic(rawProgress);
-
-    const frameIndex = Math.round(easedProgress * autoPlayEndFrame);
-
-    setFrame(frameIndex);
-
-    if (rawProgress < 1) {
-      requestAnimationFrame(animate);
-      return;
-    }
-
-    const targetScrollY = getScrollYByFrame(autoPlayEndFrame);
-
-    setScrollWithoutLock(targetScrollY);
-
-    lockedScrollY = targetScrollY;
-    lastScrollY = targetScrollY;
-
-    setFrame(autoPlayEndFrame);
-
-    isAutoPlaying = false;
-
-    showScrollGuide();
-    restartScrollGuideTimer();
+function showExternalNoticeAndMove(url) {
+  if (!externalNotice) {
+    window.location.href = url;
+    return;
   }
 
-  requestAnimationFrame(animate);
+  externalNotice.classList.add("is-visible");
+
+  setTimeout(() => {
+    window.location.href = url;
+  }, 1200);
 }
 
-function startFrameSequence() {
+/* =========================
+   영상 → 프레임 시퀀스
+========================= */
+
+function startIntroVideo() {
+  isVideoPlaying = true;
+  isPageReady = false;
+
+  saveLockedScrollPosition();
+  hideGnb();
+  hideScrollGuide();
+
+  frameImage?.classList.remove("is-visible");
+  introVideo?.classList.add("is-visible");
+
+  if (!introVideo) {
+    finishIntroVideo();
+    return;
+  }
+
+  introVideo.currentTime = 0;
+
+  const playPromise = introVideo.play();
+
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(() => {
+      finishIntroVideo();
+    });
+  }
+
+  introVideo.addEventListener("ended", finishIntroVideo, {
+    once: true
+  });
+}
+
+function finishIntroVideo() {
+  if (introVideo) {
+    introVideo.pause();
+    introVideo.classList.remove("is-visible");
+  }
+
+  frameImage?.classList.add("is-visible");
+
+  preloadFrames();
+
   setScrollWithoutLock(0);
 
   currentFrameIndex = -1;
+  setFrame(scrollStartFrame);
 
-  setFrame(0);
-  preloadFrames();
-
-  lastScrollY = 0;
   lockedScrollY = 0;
+  lastScrollY = 0;
 
-  startIntroAutoPlay();
+  isVideoPlaying = false;
+  isPageReady = true;
+
+  showGnb();
+  showScrollGuide();
+  restartScrollGuideTimer();
 }
+
+/* =========================
+   로딩
+========================= */
 
 function startLoading() {
   saveLockedScrollPosition();
@@ -384,12 +394,23 @@ function finishLoading() {
   setTimeout(() => {
     loadingPage.style.display = "none";
 
-    isPageReady = true;
-
-    startFrameSequence();
-    showGnb();
+    startIntroVideo();
   }, 800);
 }
+
+function skipLoadingAndStart() {
+  adaptivePopup?.classList.add("is-hidden");
+  loadingPage?.classList.add("is-hidden");
+
+  if (adaptivePopup) adaptivePopup.style.display = "none";
+  if (loadingPage) loadingPage.style.display = "none";
+
+  startIntroVideo();
+}
+
+/* =========================
+   메뉴
+========================= */
 
 function openMenu() {
   if (!menuButton || !menuPanel || isMenuClosing) return;
@@ -460,28 +481,41 @@ function toggleMenu() {
 function moveToHome(event) {
   event.preventDefault();
 
-  closeMenu(() => {
-    clearTimeout(scrollGuideTimer);
+  if (isMenuOpen) {
+    closeMenu(() => {
+      window.location.href = "./index.html?skipLoading=1";
+    });
 
-    isAutoPlaying = false;
+    return;
+  }
 
-    setScrollWithoutLock(0);
-
-    lockedScrollY = 0;
-    lastScrollY = 0;
-
-    setFrame(0);
-    showGnb();
-    showScrollGuide();
-  });
+  window.location.href = "./index.html?skipLoading=1";
 }
 
-saveLockedScrollPosition();
-startScrollProtection();
+/* =========================
+   초기 실행
+========================= */
+
+function initPage() {
+  saveLockedScrollPosition();
+  startScrollProtection();
+
+  const params = new URLSearchParams(window.location.search);
+  const shouldSkipLoading = params.get("skipLoading") === "1";
+
+  setFrame(scrollStartFrame);
+  frameImage?.classList.remove("is-visible");
+
+  if (shouldSkipLoading) {
+    window.history.replaceState({}, document.title, "./index.html");
+    skipLoadingAndStart();
+  }
+}
 
 menuButton?.addEventListener("click", toggleMenu);
 
 document.querySelector("[data-home-link]")?.addEventListener("click", moveToHome);
+
 courseIndexExternalLink?.addEventListener("click", (event) => {
   event.preventDefault();
 
@@ -498,16 +532,4 @@ courseIndexExternalLink?.addEventListener("click", (event) => {
 
 startButton?.addEventListener("click", startLoading);
 
-courseIndexExternalLink?.addEventListener("click", (event) => {
-  event.preventDefault();
-
-  if (isMenuOpen) {
-    closeMenu(() => {
-      showExternalNoticeAndMove(courseIndexUrl);
-    });
-
-    return;
-  }
-
-  showExternalNoticeAndMove(courseIndexUrl);
-});
+initPage();

@@ -2,6 +2,7 @@ const menuButton = document.querySelector("#menuButton");
 const menuPanel = document.querySelector("#menuPanel");
 
 const startButton = document.querySelector("#startButton");
+const prevButton = document.querySelector("#prevButton");
 const restartButton = document.querySelector("#restartButton");
 
 const introSection = document.querySelector("#introSection");
@@ -14,17 +15,18 @@ const questionTitle = document.querySelector("#questionTitle");
 const answerList = document.querySelector("#answerList");
 
 const resultImage = document.querySelector("#resultImage");
+const resultNumber = document.querySelector("#resultNumber");
 const resultName = document.querySelector("#resultName");
 const resultDescription = document.querySelector("#resultDescription");
 const resultTime = document.querySelector("#resultTime");
 const resultDistance = document.querySelector("#resultDistance");
-const resultTags = document.querySelector("#resultTags");
 const courseLink = document.querySelector("#courseLink");
 
 const menuDuration = 780;
 
 let currentQuestionIndex = 0;
 let selectedTags = [];
+let selectedHistory = [];
 let isMenuOpen = false;
 let isMenuClosing = false;
 
@@ -320,11 +322,14 @@ function toggleMenu() {
 
 function startRecommendation() {
   selectedTags = [];
+  selectedHistory = [];
   currentQuestionIndex = 0;
 
   introSection.style.display = "none";
   resultSection.classList.remove("is-visible");
   questionSection.classList.add("is-visible");
+
+  window.scrollTo(0, 0);
 
   renderQuestion();
 }
@@ -348,11 +353,14 @@ function renderQuestion() {
 
     button.addEventListener("click", () => {
       selectedTags = selectedTags.concat(answer.tags);
+      selectedHistory.push(answer.tags);
       moveToNextQuestion();
     });
 
     answerList.appendChild(button);
   });
+
+  prevButton.disabled = currentQuestionIndex === 0;
 }
 
 function moveToNextQuestion() {
@@ -363,6 +371,25 @@ function moveToNextQuestion() {
     return;
   }
 
+  renderQuestion();
+}
+
+function moveToPrevQuestion() {
+  if (currentQuestionIndex <= 0) return;
+
+  const lastTags = selectedHistory.pop();
+
+  if (lastTags) {
+    lastTags.forEach((tag) => {
+      const tagIndex = selectedTags.lastIndexOf(tag);
+
+      if (tagIndex !== -1) {
+        selectedTags.splice(tagIndex, 1);
+      }
+    });
+  }
+
+  currentQuestionIndex -= 1;
   renderQuestion();
 }
 
@@ -410,19 +437,12 @@ function showResult() {
   resultImage.src = bestCourse.image;
   resultImage.alt = `${bestCourse.id}번 코스 ${bestCourse.name}`;
 
-  resultName.textContent = `${bestCourse.id}번 코스, ${bestCourse.name}`;
+  resultNumber.textContent = `${bestCourse.id}번 코스`;
+  resultName.textContent = bestCourse.name;
   resultDescription.textContent = bestCourse.description;
-  resultTime.textContent = `소요시간 ${bestCourse.time}`;
-  resultDistance.textContent = `거리 ${bestCourse.distance}`;
+  resultTime.textContent = bestCourse.time;
+  resultDistance.textContent = bestCourse.distance;
   courseLink.href = bestCourse.link;
-
-  resultTags.innerHTML = "";
-
-  bestCourse.tags.slice(0, 5).forEach((tag) => {
-    const tagElement = document.createElement("span");
-    tagElement.textContent = `#${tag}`;
-    resultTags.appendChild(tagElement);
-  });
 
   window.scrollTo({
     top: 0,
@@ -435,6 +455,7 @@ function restartRecommendation() {
   introSection.style.display = "flex";
 
   selectedTags = [];
+  selectedHistory = [];
   currentQuestionIndex = 0;
 
   window.scrollTo({
@@ -445,4 +466,5 @@ function restartRecommendation() {
 
 menuButton?.addEventListener("click", toggleMenu);
 startButton?.addEventListener("click", startRecommendation);
+prevButton?.addEventListener("click", moveToPrevQuestion);
 restartButton?.addEventListener("click", restartRecommendation);

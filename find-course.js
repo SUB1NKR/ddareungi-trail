@@ -435,6 +435,7 @@ function showResult() {
   resultSection.classList.add("is-visible");
 
   resultImage.src = bestCourse.image;
+  resultSection.style.setProperty("--result-bg-image", `url("${bestCourse.image}")`);
   resultImage.alt = `${bestCourse.id}번 코스 ${bestCourse.name}`;
 
   resultNumber.textContent = `${bestCourse.id}번 코스`;

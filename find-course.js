@@ -7,6 +7,7 @@ const restartButton = document.querySelector("#restartButton");
 
 const introSection = document.querySelector("#introSection");
 const questionSection = document.querySelector("#questionSection");
+const findingSection = document.querySelector("#findingSection");
 const resultSection = document.querySelector("#resultSection");
 
 const progressBar = document.querySelector("#progressBar");
@@ -22,7 +23,11 @@ const resultTime = document.querySelector("#resultTime");
 const resultDistance = document.querySelector("#resultDistance");
 const courseLink = document.querySelector("#courseLink");
 
+const externalNotice = document.querySelector("#externalNotice");
+const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+
 const menuDuration = 780;
+const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 let currentQuestionIndex = 0;
 let selectedTags = [];
@@ -77,7 +82,6 @@ const courses = [
     time: "14분",
     distance: "5km",
     image: "./assets/recommend/course-01.jpg",
-    link: "./course.html#course-01",
     tags: ["숲", "자연", "쉼", "힐링", "짧은거리", "강바람", "혼자"]
   },
   {
@@ -87,7 +91,6 @@ const courses = [
     time: "25분",
     distance: "6km",
     image: "./assets/recommend/course-02.jpg",
-    link: "./course.html#course-02",
     tags: ["벚꽃", "천변", "하천", "동네", "데이트", "중간거리", "꽃"]
   },
   {
@@ -97,7 +100,6 @@ const courses = [
     time: "23분",
     distance: "5km",
     image: "./assets/recommend/course-03.jpg",
-    link: "./course.html#course-03",
     tags: ["한강", "풍경", "데이트", "힐링", "짧은거리", "명소"]
   },
   {
@@ -107,7 +109,6 @@ const courses = [
     time: "37분",
     distance: "9km",
     image: "./assets/recommend/course-04.jpg",
-    link: "./course.html#course-04",
     tags: ["도심", "관광", "명소", "도시", "긴거리", "풍경"]
   },
   {
@@ -117,7 +118,6 @@ const courses = [
     time: "35분",
     distance: "8km",
     image: "./assets/recommend/course-05.jpg",
-    link: "./course.html#course-05",
     tags: ["한강", "데이트", "나들이", "풍경", "중간거리", "명소"]
   },
   {
@@ -127,7 +127,6 @@ const courses = [
     time: "34분",
     distance: "9km",
     image: "./assets/recommend/course-06.jpg",
-    link: "./course.html#course-06",
     tags: ["한강", "안전", "자전거도로", "자연", "중간거리", "힐링"]
   },
   {
@@ -137,7 +136,6 @@ const courses = [
     time: "48분",
     distance: "13km",
     image: "./assets/recommend/course-07.jpg",
-    link: "./course.html#course-07",
     tags: ["야경", "퇴근", "한강", "밤", "긴거리", "낭만", "안전"]
   },
   {
@@ -147,7 +145,6 @@ const courses = [
     time: "28분",
     distance: "8km",
     image: "./assets/recommend/course-08.jpg",
-    link: "./course.html#course-08",
     tags: ["천변", "숲", "도심", "친구", "탐험", "중간거리", "꽃"]
   },
   {
@@ -157,7 +154,6 @@ const courses = [
     time: "17분",
     distance: "4km",
     image: "./assets/recommend/course-09.jpg",
-    link: "./course.html#course-09",
     tags: ["한강", "강바람", "전망", "짧은거리", "풍경", "낭만"]
   },
   {
@@ -167,7 +163,6 @@ const courses = [
     time: "26분",
     distance: "6km",
     image: "./assets/recommend/course-10.jpg",
-    link: "./course.html#course-10",
     tags: ["청계천", "중랑천", "하천", "천변", "한강", "중간거리"]
   },
   {
@@ -177,7 +172,6 @@ const courses = [
     time: "57분",
     distance: "13km",
     image: "./assets/recommend/course-11.jpg",
-    link: "./course.html#course-11",
     tags: ["야경", "한강", "밤", "낭만", "긴거리", "자전거도로", "풍경"]
   },
   {
@@ -187,7 +181,6 @@ const courses = [
     time: "17분",
     distance: "4km",
     image: "./assets/recommend/course-12.jpg",
-    link: "./course.html#course-12",
     tags: ["힐링", "꽃", "자연", "짧은거리", "도시", "자전거도로"]
   },
   {
@@ -197,7 +190,6 @@ const courses = [
     time: "32분",
     distance: "5km",
     image: "./assets/recommend/course-13.jpg",
-    link: "./course.html#course-13",
     tags: ["탄천", "한강", "풍경", "전망", "자연", "중간거리"]
   },
   {
@@ -207,7 +199,6 @@ const courses = [
     time: "15분",
     distance: "4km",
     image: "./assets/recommend/course-14.jpg",
-    link: "./course.html#course-14",
     tags: ["탄천", "자연", "하천", "짧은거리", "힐링", "혼자"]
   },
   {
@@ -217,7 +208,6 @@ const courses = [
     time: "1시간 7분",
     distance: "20km",
     image: "./assets/recommend/course-15.jpg",
-    link: "./course.html#course-15",
     tags: ["긴거리", "한강", "하천", "자연", "안전", "자전거도로"]
   },
   {
@@ -227,7 +217,6 @@ const courses = [
     time: "37분",
     distance: "9km",
     image: "./assets/recommend/course-16.jpg",
-    link: "./course.html#course-16",
     tags: ["꽃", "벚꽃", "장미", "중랑천", "천변", "중간거리", "자연"]
   },
   {
@@ -237,7 +226,6 @@ const courses = [
     time: "42분",
     distance: "10km",
     image: "./assets/recommend/course-17.jpg",
-    link: "./course.html#course-17",
     tags: ["안전", "자전거도로", "도림천", "하천", "밤", "색다른", "중간거리"]
   },
   {
@@ -247,7 +235,6 @@ const courses = [
     time: "23분",
     distance: "6km",
     image: "./assets/recommend/course-18.jpg",
-    link: "./course.html#course-18",
     tags: ["퇴근", "힐링", "꽃", "안양천", "천변", "중간거리", "안전"]
   },
   {
@@ -257,7 +244,6 @@ const courses = [
     time: "51분",
     distance: "6km",
     image: "./assets/recommend/course-19.jpg",
-    link: "./course.html#course-19",
     tags: ["물멍", "숲", "힐링", "한강", "중랑천", "자연", "친구"]
   },
   {
@@ -267,7 +253,6 @@ const courses = [
     time: "22분",
     distance: "5km",
     image: "./assets/recommend/course-20.jpg",
-    link: "./course.html#course-20",
     tags: ["청계천", "도심", "관광", "천변", "짧은거리", "명소"]
   }
 ];
@@ -320,6 +305,23 @@ function toggleMenu() {
   }
 }
 
+function getCourseExternalLink(courseId) {
+  return `https://www.sisul.or.kr/open_content/traffic/bike_course/view.html?id=${courseId}`;
+}
+
+function showExternalNoticeAndMove(url) {
+  if (!externalNotice) {
+    window.location.href = url;
+    return;
+  }
+
+  externalNotice.classList.add("is-visible");
+
+  setTimeout(() => {
+    window.location.href = url;
+  }, 1200);
+}
+
 function startRecommendation() {
   selectedTags = [];
   selectedHistory = [];
@@ -327,6 +329,7 @@ function startRecommendation() {
 
   introSection.style.display = "none";
   resultSection.classList.remove("is-visible");
+  findingSection.classList.remove("is-visible");
   questionSection.classList.add("is-visible");
 
   window.scrollTo(0, 0);
@@ -367,7 +370,16 @@ function moveToNextQuestion() {
   currentQuestionIndex += 1;
 
   if (currentQuestionIndex >= questions.length) {
-    showResult();
+    questionSection.classList.remove("is-visible");
+    findingSection.classList.add("is-visible");
+
+    window.scrollTo(0, 0);
+
+    setTimeout(() => {
+      findingSection.classList.remove("is-visible");
+      showResult();
+    }, 2000);
+
     return;
   }
 
@@ -431,19 +443,20 @@ function getBestCourse() {
 function showResult() {
   const bestCourse = getBestCourse();
 
-  questionSection.classList.remove("is-visible");
   resultSection.classList.add("is-visible");
 
   resultImage.src = bestCourse.image;
-  resultSection.style.setProperty("--result-bg-image", `url("${bestCourse.image}")`);
   resultImage.alt = `${bestCourse.id}번 코스 ${bestCourse.name}`;
+
+  resultSection.style.setProperty("--result-bg-image", `url("${bestCourse.image}")`);
 
   resultNumber.textContent = `${bestCourse.id}번 코스`;
   resultName.textContent = bestCourse.name;
   resultDescription.textContent = bestCourse.description;
   resultTime.textContent = bestCourse.time;
   resultDistance.textContent = bestCourse.distance;
-  courseLink.href = bestCourse.link;
+
+  courseLink.href = getCourseExternalLink(bestCourse.id);
 
   window.scrollTo({
     top: 0,
@@ -453,6 +466,9 @@ function showResult() {
 
 function restartRecommendation() {
   resultSection.classList.remove("is-visible");
+  findingSection.classList.remove("is-visible");
+  questionSection.classList.remove("is-visible");
+
   introSection.style.display = "flex";
 
   selectedTags = [];
@@ -469,3 +485,13 @@ menuButton?.addEventListener("click", toggleMenu);
 startButton?.addEventListener("click", startRecommendation);
 prevButton?.addEventListener("click", moveToPrevQuestion);
 restartButton?.addEventListener("click", restartRecommendation);
+
+courseLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  showExternalNoticeAndMove(courseLink.href);
+});
+
+courseIndexExternalLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  showExternalNoticeAndMove(courseIndexUrl);
+});

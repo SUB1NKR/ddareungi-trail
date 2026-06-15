@@ -455,6 +455,7 @@ function showResultWithTransition() {
 function showResult() {
   const bestCourse = getBestCourse();
 
+  resultSection.classList.remove("is-entering");
   resultSection.classList.add("is-visible");
 
   resultImage.src = bestCourse.image;
@@ -486,10 +487,25 @@ function showResult() {
     top: 0,
     behavior: "smooth"
   });
+
+  requestAnimationFrame(() => {
+    resultSection.classList.add("is-entering");
+  });
+}
+
+  resultTime.textContent = bestCourse.time;
+  resultDistance.textContent = bestCourse.distance;
+
+  courseLink.href = getCourseExternalLink(bestCourse.id);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 function restartRecommendation() {
-  resultSection.classList.remove("is-visible");
+  resultSection.classList.remove("is-visible", "is-entering");
   findingSection.classList.remove("is-visible");
   questionSection.classList.remove("is-visible");
 

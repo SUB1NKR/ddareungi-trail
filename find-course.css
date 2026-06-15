@@ -274,7 +274,10 @@ body.is-menu-closing .gnb-menu-button span {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #101613;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(48, 226, 145, 0.22), transparent 34%),
+    radial-gradient(circle at 82% 82%, rgba(48, 226, 145, 0.16), transparent 32%),
+    linear-gradient(180deg, #F5FFF9 0%, #EFFFF6 100%);
 }
 
 .rolling-gallery {
@@ -284,9 +287,9 @@ body.is-menu-closing .gnb-menu-button span {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
+  gap: 14px;
   overflow: hidden;
-  transform: rotate(-2deg) scale(1.08);
+  transform: rotate(-1.5deg) scale(1.06);
 }
 
 .rolling-gallery::before,
@@ -295,19 +298,19 @@ body.is-menu-closing .gnb-menu-button span {
   position: absolute;
   top: 0;
   bottom: 0;
-  z-index: 3;
-  width: 14vw;
+  z-index: 4;
+  width: 12vw;
   pointer-events: none;
 }
 
 .rolling-gallery::before {
   left: 0;
-  background: linear-gradient(90deg, rgba(16, 22, 19, 0.92), transparent);
+  background: linear-gradient(90deg, rgba(245, 255, 249, 0.96), transparent);
 }
 
 .rolling-gallery::after {
   right: 0;
-  background: linear-gradient(270deg, rgba(16, 22, 19, 0.92), transparent);
+  background: linear-gradient(270deg, rgba(245, 255, 249, 0.96), transparent);
 }
 
 .rolling-row {
@@ -315,27 +318,44 @@ body.is-menu-closing .gnb-menu-button span {
   overflow: hidden;
 }
 
+.rolling-row-01 {
+  transform: translateX(-3vw);
+}
+
+.rolling-row-02 {
+  transform: translateX(-11vw);
+}
+
+.rolling-row-03 {
+  transform: translateX(-6vw);
+}
+
 .rolling-track {
   width: max-content;
   display: flex;
-  gap: 18px;
-  animation: rollingLeft 42s linear infinite;
+  gap: 14px;
+  animation: rollingLeft 44s linear infinite;
   will-change: transform;
 }
 
 .rolling-track.reverse {
   animation-name: rollingRight;
-  animation-duration: 50s;
+  animation-duration: 52s;
+}
+
+.rolling-track.slow {
+  animation-duration: 58s;
 }
 
 .rolling-track img {
-  width: clamp(380px, 36vw, 700px);
+  width: clamp(380px, 34vw, 680px);
   aspect-ratio: 16 / 9;
   display: block;
   object-fit: cover;
-  border-radius: 30px;
+  border-radius: 28px;
   flex: 0 0 auto;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 18px 44px rgba(30, 30, 30, 0.12);
+  filter: saturate(1.04) brightness(1.02);
 }
 
 .intro-dim {
@@ -343,24 +363,23 @@ body.is-menu-closing .gnb-menu-button span {
   inset: var(--gnb-height) 0 0;
   z-index: 2;
   background:
-    radial-gradient(circle at 50% 50%, rgba(48, 226, 145, 0.16), transparent 34%),
-    linear-gradient(180deg, rgba(30, 30, 30, 0.18), rgba(30, 30, 30, 0.58)),
-    rgba(30, 30, 30, 0.34);
-  backdrop-filter: blur(1px);
+    linear-gradient(180deg, rgba(245, 255, 249, 0.28), rgba(245, 255, 249, 0.62)),
+    rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(0.5px);
 }
 
 .intro-card {
   position: relative;
-  z-index: 4;
-  width: min(880px, calc(100% - 88px));
-  min-height: 400px;
-  padding: 54px 64px 56px;
-  border-radius: 38px;
-  background: rgba(247, 255, 250, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.74);
+  z-index: 5;
+  width: min(860px, calc(100% - 88px));
+  min-height: 390px;
+  padding: 52px 64px 54px;
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(48, 226, 145, 0.24);
   box-shadow:
-    0 34px 110px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 30px 90px rgba(30, 30, 30, 0.12),
+    0 0 0 10px rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(18px);
   display: flex;
   flex-direction: column;
@@ -384,12 +403,15 @@ body.is-menu-closing .gnb-menu-button span {
 .intro-card::after {
   content: "";
   position: absolute;
-  inset: auto 32px 32px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(48, 226, 145, 0.34), transparent);
+  inset: 18px;
+  border-radius: 28px;
+  border: 1px solid rgba(48, 226, 145, 0.12);
+  pointer-events: none;
 }
 
 .eyebrow {
+  position: relative;
+  z-index: 1;
   margin: 0 0 22px;
   color: #159B62;
   font-size: 18px;
@@ -398,6 +420,8 @@ body.is-menu-closing .gnb-menu-button span {
 }
 
 .intro-card h1 {
+  position: relative;
+  z-index: 1;
   margin: 0;
   color: var(--black);
   font-size: clamp(42px, 3.9vw, 56px);
@@ -406,6 +430,8 @@ body.is-menu-closing .gnb-menu-button span {
 }
 
 .intro-description {
+  position: relative;
+  z-index: 1;
   margin: 26px 0 0;
   color: rgba(30, 30, 30, 0.72);
   font-size: clamp(17px, 1.28vw, 22px);
@@ -430,6 +456,8 @@ body.is-menu-closing .gnb-menu-button span {
 }
 
 .primary-button {
+  position: relative;
+  z-index: 1;
   margin-top: 34px;
   background: var(--main-color);
   color: #ffffff;
@@ -470,7 +498,6 @@ body.is-menu-closing .gnb-menu-button span {
     transform: translateX(0);
   }
 }
-
 /* =========================
    Questions
 ========================= */

@@ -287,7 +287,6 @@ function startIntroVideo() {
   hideScrollGuide();
 
   frameImage?.classList.remove("is-visible");
-  introVideo?.classList.add("is-visible");
 
   if (!introVideo) {
     finishIntroVideo();
@@ -295,18 +294,21 @@ function startIntroVideo() {
   }
 
   introVideo.currentTime = 0;
-
-  const playPromise = introVideo.play();
-
-  if (playPromise && typeof playPromise.catch === "function") {
-    playPromise.catch(() => {
-      finishIntroVideo();
-    });
-  }
+  introVideo.classList.add("is-visible");
 
   introVideo.addEventListener("ended", finishIntroVideo, {
     once: true
   });
+
+  setTimeout(() => {
+    const playPromise = introVideo.play();
+
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        finishIntroVideo();
+      });
+    }
+  }, 1000);
 }
 
 function finishIntroVideo() {

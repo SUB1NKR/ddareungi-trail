@@ -1056,3 +1056,92 @@ body.is-menu-closing .gnb-menu-button span {
     font-size: 13px;
   }
 }
+
+/* =========================
+   6차 수정사항
+========================= */
+
+/* 1. 코스 추천 메인 롤링 이미지 크기 더 축소 */
+.rolling-track img {
+  width: clamp(240px, 21vw, 420px);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 22px;
+  flex: 0 0 auto;
+  background: #ffffff;
+}
+
+/* 사진 간격은 유지 */
+.rolling-track {
+  gap: 12px;
+}
+
+/* 2. 질문 페이지 박스 좌우 크기 더 확대 */
+.question-card {
+  width: min(1120px, 100%);
+}
+
+/* 3. 추천 로딩 화면 부드러운 전환 */
+.finding-section {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 520ms ease,
+    visibility 0s linear 520ms;
+}
+
+.finding-section.is-visible {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 520ms ease,
+    visibility 0s;
+}
+
+/* 결과 화면도 부드럽게 등장 */
+.result-section {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 720ms ease,
+    visibility 0s linear 720ms;
+}
+
+.result-section.is-visible {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 720ms ease,
+    visibility 0s;
+}
+
+/* 결과 카드가 살짝 올라오며 등장 */
+.result-card {
+  transform: translateY(18px);
+  transition:
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 720ms ease;
+}
+
+.result-section.is-visible .result-card {
+  transform: translateY(0);
+}
+
+/* 모바일 보정 */
+@media (max-width: 900px) {
+  .rolling-track img {
+    width: 260px;
+    border-radius: 18px;
+  }
+
+  .question-card {
+    width: 100%;
+  }
+}

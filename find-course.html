@@ -224,5 +224,132 @@
   </div>
 
   <script src="./find-course.js"></script>
+
+<script>
+  window.addEventListener("DOMContentLoaded", function () {
+    const menuButton = document.querySelector("#menuButton");
+    const menuPanel = document.querySelector("#menuPanel");
+
+    const startButton = document.querySelector("#startButton");
+    const introSection = document.querySelector("#introSection");
+    const questionSection = document.querySelector("#questionSection");
+
+    const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+    const externalNotice = document.querySelector("#externalNotice");
+
+    const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
+    const menuDuration = 780;
+
+    let isMenuOpen = false;
+    let isMenuClosing = false;
+
+    function openMenuFallback() {
+      if (!menuButton || !menuPanel || isMenuClosing) return;
+
+      isMenuOpen = true;
+      isMenuClosing = false;
+
+      document.body.classList.add("is-menu-open");
+      document.body.classList.remove("is-menu-closing");
+
+      menuPanel.classList.remove("is-closing");
+      menuPanel.classList.add("is-open");
+
+      menuButton.classList.add("is-open");
+      menuButton.setAttribute("aria-label", "메뉴 닫기");
+    }
+
+    function closeMenuFallback(callback) {
+      if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
+
+      isMenuOpen = false;
+      isMenuClosing = true;
+
+      document.body.classList.remove("is-menu-open");
+      document.body.classList.add("is-menu-closing");
+
+      menuPanel.classList.remove("is-open");
+      menuPanel.classList.add("is-closing");
+
+      setTimeout(function () {
+        isMenuClosing = false;
+
+        menuPanel.classList.remove("is-closing");
+
+        menuButton.classList.remove("is-open");
+        menuButton.setAttribute("aria-label", "메뉴 열기");
+
+        document.body.classList.remove("is-menu-closing");
+
+        if (typeof callback === "function") {
+          callback();
+        }
+      }, menuDuration);
+    }
+
+    function toggleMenuFallback() {
+      if (isMenuOpen) {
+        closeMenuFallback();
+      } else {
+        openMenuFallback();
+      }
+    }
+
+    function startRecommendationFallback() {
+      if (!introSection || !questionSection) return;
+
+      introSection.style.display = "none";
+      questionSection.classList.add("is-visible");
+
+      window.scrollTo(0, 0);
+    }
+
+    function showExternalNoticeAndMoveFallback(url) {
+      if (!externalNotice) {
+        window.location.href = url;
+        return;
+      }
+
+      externalNotice.classList.add("is-visible");
+
+      setTimeout(function () {
+        window.location.href = url;
+      }, 1200);
+    }
+
+    menuButton?.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleMenuFallback();
+    });
+
+    startButton?.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (typeof window.startRecommendation === "function") {
+        window.startRecommendation();
+        return;
+      }
+
+      startRecommendationFallback();
+    });
+
+    courseIndexExternalLink?.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (isMenuOpen) {
+        closeMenuFallback(function () {
+          showExternalNoticeAndMoveFallback(courseIndexUrl);
+        });
+
+        return;
+      }
+
+      showExternalNoticeAndMoveFallback(courseIndexUrl);
+    });
+  });
+</script>
 </body>
 </html>

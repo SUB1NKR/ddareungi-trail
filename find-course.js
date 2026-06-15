@@ -274,7 +274,7 @@ function openMenu() {
   menuButton.setAttribute("aria-label", "메뉴 닫기");
 }
 
-function closeMenu() {
+function closeMenu(callback) {
   if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
 
   isMenuOpen = false;
@@ -295,6 +295,10 @@ function closeMenu() {
     menuButton.setAttribute("aria-label", "메뉴 열기");
 
     document.body.classList.remove("is-menu-closing");
+
+    if (typeof callback === "function") {
+      callback();
+    }
   }, menuDuration);
 }
 
@@ -377,8 +381,7 @@ function moveToNextQuestion() {
     window.scrollTo(0, 0);
 
     setTimeout(() => {
-      findingSection.classList.remove("is-visible");
-      showResult();
+      showResultWithTransition();
     }, 2000);
 
     return;
@@ -441,6 +444,14 @@ function getBestCourse() {
   return scores[0].course;
 }
 
+function showResultWithTransition() {
+  findingSection.classList.remove("is-visible");
+
+  setTimeout(() => {
+    showResult();
+  }, 520);
+}
+
 function showResult() {
   const bestCourse = getBestCourse();
 
@@ -453,21 +464,21 @@ function showResult() {
 
   resultNumber.textContent = `${bestCourse.id}번 코스`;
   resultName.textContent = bestCourse.name;
-resultDescription.textContent = bestCourse.description;
+  resultDescription.textContent = bestCourse.description;
 
-if (resultTags) {
-  resultTags.innerHTML = "";
+  if (resultTags) {
+    resultTags.innerHTML = "";
 
-  bestCourse.tags.slice(0, 6).forEach((tag) => {
-    const tagElement = document.createElement("span");
-    tagElement.className = "result-tag";
-    tagElement.textContent = `#${tag}`;
-    resultTags.appendChild(tagElement);
-  });
-}
+    bestCourse.tags.slice(0, 6).forEach((tag) => {
+      const tagElement = document.createElement("span");
+      tagElement.className = "result-tag";
+      tagElement.textContent = `#${tag}`;
+      resultTags.appendChild(tagElement);
+    });
+  }
 
-resultTime.textContent = bestCourse.time;
-resultDistance.textContent = bestCourse.distance;
+  resultTime.textContent = bestCourse.time;
+  resultDistance.textContent = bestCourse.distance;
 
   courseLink.href = getCourseExternalLink(bestCourse.id);
 
@@ -506,5 +517,14 @@ courseLink?.addEventListener("click", (event) => {
 
 courseIndexExternalLink?.addEventListener("click", (event) => {
   event.preventDefault();
+
+  if (isMenuOpen) {
+    closeMenu(() => {
+      showExternalNoticeAndMove(courseIndexUrl);
+    });
+
+    return;
+  }
+
   showExternalNoticeAndMove(courseIndexUrl);
 });

@@ -24,7 +24,7 @@
 
   <section id="menuPanel" class="menu-panel" aria-label="전체 메뉴">
     <div class="menu-content">
-      <nav class="menu-nav">
+      <nav class="menu-nav" aria-label="주요 메뉴">
         <a href="./index.html?skipLoading=1" class="menu-link" style="--i: 0">
           <span>홈</span>
         </a>
@@ -38,7 +38,7 @@
         </a>
       </nav>
 
-      <div class="menu-icon-list">
+      <div class="menu-icon-list" aria-label="외부 링크">
         <a href="https://www.facebook.com/seoulbike" target="_blank" rel="noopener noreferrer" class="menu-sns-link" style="--i: 3">
           <img src="./assets/icons/menu-icon-01.png" alt="서울자전거 페이스북" />
         </a>
@@ -73,7 +73,6 @@
             <img src="./assets/recommend/course-13.jpg" alt="" />
             <img src="./assets/recommend/course-17.jpg" alt="" />
             <img src="./assets/recommend/course-20.jpg" alt="" />
-
             <img src="./assets/recommend/course-01.jpg" alt="" />
             <img src="./assets/recommend/course-05.jpg" alt="" />
             <img src="./assets/recommend/course-09.jpg" alt="" />
@@ -91,7 +90,6 @@
             <img src="./assets/recommend/course-14.jpg" alt="" />
             <img src="./assets/recommend/course-18.jpg" alt="" />
             <img src="./assets/recommend/course-03.jpg" alt="" />
-
             <img src="./assets/recommend/course-02.jpg" alt="" />
             <img src="./assets/recommend/course-06.jpg" alt="" />
             <img src="./assets/recommend/course-10.jpg" alt="" />
@@ -109,7 +107,6 @@
             <img src="./assets/recommend/course-15.jpg" alt="" />
             <img src="./assets/recommend/course-16.jpg" alt="" />
             <img src="./assets/recommend/course-19.jpg" alt="" />
-
             <img src="./assets/recommend/course-04.jpg" alt="" />
             <img src="./assets/recommend/course-07.jpg" alt="" />
             <img src="./assets/recommend/course-11.jpg" alt="" />
@@ -176,10 +173,6 @@
 
     <section id="resultSection" class="result-section">
       <div class="result-card">
-        <div class="result-image-wrap">
-          <img id="resultImage" src="" alt="" />
-        </div>
-
         <div class="result-content">
           <p class="result-label">당신에게 어울리는 따릉이길은</p>
 
@@ -224,132 +217,5 @@
   </div>
 
   <script src="./find-course.js"></script>
-
-<script>
-  window.addEventListener("DOMContentLoaded", function () {
-    const menuButton = document.querySelector("#menuButton");
-    const menuPanel = document.querySelector("#menuPanel");
-
-    const startButton = document.querySelector("#startButton");
-    const introSection = document.querySelector("#introSection");
-    const questionSection = document.querySelector("#questionSection");
-
-    const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
-    const externalNotice = document.querySelector("#externalNotice");
-
-    const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
-    const menuDuration = 780;
-
-    let isMenuOpen = false;
-    let isMenuClosing = false;
-
-    function openMenuFallback() {
-      if (!menuButton || !menuPanel || isMenuClosing) return;
-
-      isMenuOpen = true;
-      isMenuClosing = false;
-
-      document.body.classList.add("is-menu-open");
-      document.body.classList.remove("is-menu-closing");
-
-      menuPanel.classList.remove("is-closing");
-      menuPanel.classList.add("is-open");
-
-      menuButton.classList.add("is-open");
-      menuButton.setAttribute("aria-label", "메뉴 닫기");
-    }
-
-    function closeMenuFallback(callback) {
-      if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
-
-      isMenuOpen = false;
-      isMenuClosing = true;
-
-      document.body.classList.remove("is-menu-open");
-      document.body.classList.add("is-menu-closing");
-
-      menuPanel.classList.remove("is-open");
-      menuPanel.classList.add("is-closing");
-
-      setTimeout(function () {
-        isMenuClosing = false;
-
-        menuPanel.classList.remove("is-closing");
-
-        menuButton.classList.remove("is-open");
-        menuButton.setAttribute("aria-label", "메뉴 열기");
-
-        document.body.classList.remove("is-menu-closing");
-
-        if (typeof callback === "function") {
-          callback();
-        }
-      }, menuDuration);
-    }
-
-    function toggleMenuFallback() {
-      if (isMenuOpen) {
-        closeMenuFallback();
-      } else {
-        openMenuFallback();
-      }
-    }
-
-    function startRecommendationFallback() {
-      if (!introSection || !questionSection) return;
-
-      introSection.style.display = "none";
-      questionSection.classList.add("is-visible");
-
-      window.scrollTo(0, 0);
-    }
-
-    function showExternalNoticeAndMoveFallback(url) {
-      if (!externalNotice) {
-        window.location.href = url;
-        return;
-      }
-
-      externalNotice.classList.add("is-visible");
-
-      setTimeout(function () {
-        window.location.href = url;
-      }, 1200);
-    }
-
-    menuButton?.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      toggleMenuFallback();
-    });
-
-    startButton?.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (typeof window.startRecommendation === "function") {
-        window.startRecommendation();
-        return;
-      }
-
-      startRecommendationFallback();
-    });
-
-    courseIndexExternalLink?.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (isMenuOpen) {
-        closeMenuFallback(function () {
-          showExternalNoticeAndMoveFallback(courseIndexUrl);
-        });
-
-        return;
-      }
-
-      showExternalNoticeAndMoveFallback(courseIndexUrl);
-    });
-  });
-</script>
 </body>
 </html>

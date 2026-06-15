@@ -19,6 +19,7 @@ const resultImage = document.querySelector("#resultImage");
 const resultNumber = document.querySelector("#resultNumber");
 const resultName = document.querySelector("#resultName");
 const resultDescription = document.querySelector("#resultDescription");
+const resultTags = document.querySelector("#resultTags");
 const resultTime = document.querySelector("#resultTime");
 const resultDistance = document.querySelector("#resultDistance");
 const courseLink = document.querySelector("#courseLink");
@@ -452,9 +453,21 @@ function showResult() {
 
   resultNumber.textContent = `${bestCourse.id}번 코스`;
   resultName.textContent = bestCourse.name;
-  resultDescription.textContent = bestCourse.description;
-  resultTime.textContent = bestCourse.time;
-  resultDistance.textContent = bestCourse.distance;
+resultDescription.textContent = bestCourse.description;
+
+if (resultTags) {
+  resultTags.innerHTML = "";
+
+  bestCourse.tags.slice(0, 6).forEach((tag) => {
+    const tagElement = document.createElement("span");
+    tagElement.className = "result-tag";
+    tagElement.textContent = `#${tag}`;
+    resultTags.appendChild(tagElement);
+  });
+}
+
+resultTime.textContent = bestCourse.time;
+resultDistance.textContent = bestCourse.distance;
 
   courseLink.href = getCourseExternalLink(bestCourse.id);
 

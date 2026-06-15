@@ -968,3 +968,91 @@ body.is-menu-closing .gnb-menu-button span {
     width: 100%;
   }
 }
+
+/* =========================
+   5차 수정사항
+========================= */
+
+/* 1. 메인 롤링 이미지 잘림 방지 + 크기 축소 */
+.rolling-track img {
+  width: clamp(300px, 26vw, 520px);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 24px;
+  flex: 0 0 auto;
+  background: #ffffff;
+}
+
+/* 사진 간격은 기존 12px 유지 */
+.rolling-track {
+  gap: 12px;
+}
+
+/* 메인 박스 라벨 */
+.intro-label {
+  margin: 0 0 22px;
+  color: #30E291;
+  font-size: clamp(18px, 1.4vw, 24px);
+  line-height: 1;
+  font-weight: 900;
+}
+
+/* 2. 질문 페이지 박스 좌우 크기 확대 */
+.question-card {
+  width: min(1040px, 100%);
+}
+
+/* 질문 박스가 넓어졌을 때 답변도 안정적으로 보이게 */
+.answer-button {
+  width: 100%;
+}
+
+/* 3. 결과 페이지 해시태그 */
+.result-tags {
+  max-width: 780px;
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.result-tag {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(48, 226, 145, 0.16);
+  color: #159B62;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+/* 모바일 보정 */
+@media (max-width: 900px) {
+  .rolling-track img {
+    width: 300px;
+    border-radius: 18px;
+  }
+
+  .question-card {
+    width: 100%;
+  }
+
+  .intro-label {
+    font-size: 17px;
+  }
+
+  .result-tags {
+    gap: 7px;
+  }
+
+  .result-tag {
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}

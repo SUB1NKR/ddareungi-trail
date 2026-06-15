@@ -834,35 +834,33 @@ body.is-menu-closing .gnb-menu-button span {
   }
 
   .rolling-gallery {
-    gap: 14px;
-  }
+  gap: 10px;
+  transform: rotate(-1.5deg) scale(1.08);
+}
 
-  .rolling-track {
-    gap: 14px;
-  }
+.rolling-track {
+  gap: 10px;
+}
 
-  .rolling-track img {
-    width: 380px;
-    border-radius: 22px;
-  }
+.rolling-track img {
+  width: 360px;
+  border-radius: 20px;
+}
 
-  .intro-card {
-    width: calc(100% - 40px);
-    min-height: auto;
-    padding: 44px 24px;
-    border-radius: 30px;
-  }
+.intro-card {
+  width: calc(100% - 40px);
+  min-height: auto;
+  padding: 44px 24px;
+  border-radius: 30px;
+}
 
-  .intro-card h1,
-  .question-card h2,
-  .result-content h2 {
-    font-size: 40px;
-  }
+.intro-card h1 {
+  font-size: 40px;
+}
 
-  .intro-description {
-    font-size: 17px;
-  }
-
+.intro-description {
+  font-size: 17px;
+}
   .question-section {
     height: auto;
     min-height: 100vh;

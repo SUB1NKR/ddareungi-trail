@@ -66,10 +66,10 @@
   </section>
 
   <!-- 상단 GNB -->
-<header id="gnb" class="site-gnb" aria-label="상단 메뉴">
-  <a href="./index.html?skipLoading=1" class="gnb-logo" aria-label="따릉이 트레일 홈">
-    <img src="./assets/icons/ddareungi-logo.png" alt="따릉이 트레일" />
-  </a>
+  <header id="gnb" class="site-gnb" aria-label="상단 메뉴">
+    <a href="./index.html?skipLoading=1" class="gnb-logo" aria-label="따릉이 트레일 홈">
+      <img src="./assets/icons/ddareungi-logo.png" alt="따릉이 트레일" />
+    </a>
 
     <button id="menuButton" class="gnb-menu-button" type="button" aria-label="메뉴 열기">
       <span></span>
@@ -82,13 +82,13 @@
   <section id="menuPanel" class="menu-panel" aria-label="전체 메뉴">
     <div class="menu-content">
       <nav class="menu-nav" aria-label="주요 메뉴">
-  <a href="./index.html?skipLoading=1" class="menu-link" data-home-link style="--i: 0">
-    <span>홈</span>
-  </a>
+        <a href="./index.html?skipLoading=1" class="menu-link" data-home-link style="--i: 0">
+          <span>홈</span>
+        </a>
 
-       <a href="#" id="courseIndexExternalLink" class="menu-link" data-external-course-index style="--i: 1">
-        <span>20코스 안내</span>
-      </a>
+        <a href="#" id="courseIndexExternalLink" class="menu-link" style="--i: 1">
+          <span>20코스 안내</span>
+        </a>
 
         <a href="./find-course.html" class="menu-link" style="--i: 2">
           <span>나만의 코스 찾기</span>
@@ -145,10 +145,19 @@
 
   <!-- 고정 메인화면 -->
   <main id="main" class="main-page">
+    <video
+      id="introVideo"
+      class="intro-video"
+      src="./assets/video/intro.webm"
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+
     <img
       id="frameImage"
       class="frame-image"
-      src="./assets/frames/BX사이트000.webp"
+      src="./assets/frames/BX사이트150.webp"
       alt="따릉이 트레일 프레임 애니메이션"
     />
 
@@ -168,11 +177,14 @@
 
   <!-- 실제 스크롤값을 만들기 위한 보이지 않는 영역 -->
   <div id="scrollProxy" class="scroll-proxy" aria-hidden="true"></div>
-<div id="externalNotice" class="external-notice">
-  <div class="external-notice-card">
-    <p>외부 페이지로 이동합니다.</p>
+
+  <!-- 외부 이동 안내 -->
+  <div id="externalNotice" class="external-notice">
+    <div class="external-notice-card">
+      <p>외부 페이지로 이동합니다.</p>
+    </div>
   </div>
-</div>
+
   <script src="./script.js"></script>
 </body>
 </html>

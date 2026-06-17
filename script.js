@@ -505,7 +505,7 @@ function initPage() {
   const params = new URLSearchParams(window.location.search);
   const shouldSkipLoading = params.get("skipLoading") === "1";
 
-  setFrame(scrollStartFrame);
+  setFrame(0);
   frameImage?.classList.remove("is-visible");
 
   if (shouldSkipLoading) {

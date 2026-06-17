@@ -37,7 +37,7 @@ const frameExtension = ".webp";
   영상 종료 후 스크롤 프레임 시작 위치
   영상 마지막 장면이 BX사이트0000.webp 근처와 이어진다는 전제
 */
-const scrollStartFrame = 0000;
+const scrollStartFrame = 0;
 
 let currentSlideIndex = 0;
 let slideTimer = null;
@@ -286,16 +286,24 @@ function startIntroVideo() {
   hideGnb();
   hideScrollGuide();
 
-  frameImage?.classList.remove("is-visible");
+  if (frameImage) {
+    frameImage.classList.remove("is-visible");
+    frameImage.style.opacity = "0";
+  }
 
   if (!introVideo) {
     finishIntroVideo();
     return;
   }
 
+  introVideo.pause();
   introVideo.currentTime = 0;
-  introVideo.classList.add("is-visible");
 
+  introVideo.classList.add("is-visible");
+  introVideo.style.display = "block";
+  introVideo.style.opacity = "1";
+
+  introVideo.removeEventListener("ended", finishIntroVideo);
   introVideo.addEventListener("ended", finishIntroVideo, {
     once: true
   });
@@ -315,9 +323,16 @@ function finishIntroVideo() {
   if (introVideo) {
     introVideo.pause();
     introVideo.classList.remove("is-visible");
+    introVideo.style.opacity = "0";
+    introVideo.style.display = "none";
   }
 
-  frameImage?.classList.add("is-visible");
+  if (frameImage) {
+    frameImage.src = "./assets/frames/BX사이트000.webp";
+    frameImage.classList.add("is-visible");
+    frameImage.style.opacity = "1";
+    frameImage.style.display = "block";
+  }
 
   preloadFrames();
 

@@ -63,7 +63,7 @@ function clamp(value, min, max) {
 }
 
 function getFrameSrc(index) {
-  const frameNumber = String(frameStartIndex + index).padStart(3, "0");
+  const frameNumber = String(frameStartIndex + index).padStart(4, "0");
   return `${framePath}${framePrefix}${frameNumber}${frameExtension}`;
 }
 

@@ -328,7 +328,7 @@ function finishIntroVideo() {
   }
 
   if (frameImage) {
-    frameImage.src = "./assets/frames/BX사이트000.webp";
+    frameImage.src = "./assets/frames/BX사이트0000.webp";
     frameImage.classList.add("is-visible");
     frameImage.style.opacity = "1";
     frameImage.style.display = "block";

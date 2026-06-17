@@ -494,6 +494,7 @@ body.is-menu-closing .gnb-menu-button span {
 .frame-image {
   z-index: 1;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 500ms ease;
 }
 

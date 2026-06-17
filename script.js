@@ -35,9 +35,9 @@ const frameExtension = ".webp";
 
 /*
   영상 종료 후 스크롤 프레임 시작 위치
-  영상 마지막 장면이 BX사이트150.webp 근처와 이어진다는 전제
+  영상 마지막 장면이 BX사이트0000.webp 근처와 이어진다는 전제
 */
-const scrollStartFrame = 150;
+const scrollStartFrame = 0000;
 
 let currentSlideIndex = 0;
 let slideTimer = null;

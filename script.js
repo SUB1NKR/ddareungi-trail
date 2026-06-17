@@ -39,7 +39,7 @@ const frameExtension = ".webp";
 */
 const scrollStartFrame = 0;
 
-const scrollSpeedMultiplier = 2;
+const scrollSpeedMultiplier = 4;
 const baseScrollScreens = 8;
 
 let currentSlideIndex = 0;

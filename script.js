@@ -324,7 +324,7 @@ function finishIntroVideo() {
   setScrollWithoutLock(0);
 
   currentFrameIndex = -1;
-  setFrame(scrollStartFrame);
+  setFrame(0);
 
   lockedScrollY = 0;
   lastScrollY = 0;

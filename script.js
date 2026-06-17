@@ -39,6 +39,9 @@ const frameExtension = ".webp";
 */
 const scrollStartFrame = 0;
 
+const scrollSpeedMultiplier = 2;
+const baseScrollScreens = 8;
+
 let currentSlideIndex = 0;
 let slideTimer = null;
 let scrollGuideTimer = null;
@@ -68,7 +71,7 @@ function getFrameSrc(index) {
 }
 
 function getMaxScroll() {
-  return Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+  return window.innerHeight * baseScrollScreens * scrollSpeedMultiplier;
 }
 
 function getScrollProgress() {
@@ -514,6 +517,8 @@ function moveToHome(event) {
 ========================= */
 
 function initPage() {
+  document.body.style.minHeight = `${window.innerHeight * baseScrollScreens * scrollSpeedMultiplier + window.innerHeight}px`;
+
   saveLockedScrollPosition();
   startScrollProtection();
 
@@ -548,5 +553,10 @@ courseIndexExternalLink?.addEventListener("click", (event) => {
 });
 
 startButton?.addEventListener("click", startLoading);
+
+window.addEventListener("resize", () => {
+  document.body.style.minHeight = `${window.innerHeight * baseScrollScreens * scrollSpeedMultiplier + window.innerHeight}px`;
+  updateFrameByScroll();
+});
 
 initPage();

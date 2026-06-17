@@ -25,9 +25,9 @@ const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course
 
 /*
   프레임 이미지 설정
-  BX사이트000.webp ~ BX사이트361.webp = 362장
+  BX사이트0000.webp ~ BX사이트0361.webp = 362장
 */
-const frameCount = 362;
+const frameCount = 0361;
 const frameStartIndex = 0;
 const framePath = "./assets/frames/";
 const framePrefix = "BX사이트";

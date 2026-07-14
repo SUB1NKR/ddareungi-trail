@@ -58,7 +58,6 @@
   </section>
 
   <main id="main" class="main-page">
-    <video id="introVideo" class="intro-video" src="./assets/video/intro.webm" muted playsinline preload="auto"></video>
     <canvas id="sequenceCanvas" class="sequence-canvas" aria-label="따릉이 트레일 프레임 애니메이션"></canvas>
 
     <div id="scrollGuide" class="scroll-guide" aria-hidden="true">
@@ -70,21 +69,27 @@
     </div>
 
     <div id="endCta" class="end-cta" aria-hidden="true">
-      <p>나와 맞는 코스를 찾아볼까?</p>
+      <p>그럼 서울 따라서 따릉이길 만나러 가볼까요?</p>
       <a href="./find-course.html">코스 찾기 시작하기</a>
     </div>
   </main>
 
   <div id="scrollProxy" class="scroll-proxy" aria-hidden="true"></div>
 
-  <div id="externalNotice" class="external-notice">
-    <div class="external-notice-card">
+  <div id="externalNotice" class="external-notice" aria-hidden="true">
+    <div class="external-notice-card" role="dialog" aria-modal="true" aria-label="외부 페이지 이동 안내">
       <p>외부 페이지로 이동합니다.</p>
+      <div class="external-notice-actions">
+        <button id="externalCancelButton" class="external-notice-button is-cancel" type="button">취소</button>
+        <button id="externalMoveButton" class="external-notice-button is-primary" type="button">이동하기</button>
+      </div>
     </div>
   </div>
 
+  <div id="brandCursor" class="brand-cursor" aria-hidden="true"></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="./script.js?v=canvas-gsap-20260715"></script>
+  <script src="./script.js?v=preserve-canvas-2552-autoplay70"></script>
 </body>
 </html>

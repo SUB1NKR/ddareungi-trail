@@ -4,7 +4,7 @@
 
 :root {
   --main-color: #30E291;
-  --black: #1e1e1e;
+  --black: #151A18;
   --gnb-height: 100px;
   --loading-height: 7px;
   --menu-duration: 780ms;
@@ -166,7 +166,7 @@ a { font: inherit; }
   font-size: clamp(15px, 1.2vw, 19px);
   line-height: 1.6;
   font-weight: 500;
-  color: rgba(30, 30, 30, 0.68);
+  color: rgba(21, 26, 24, 0.68);
 }
 
 .popup-button {
@@ -201,7 +201,7 @@ a { font: inherit; }
   align-items: center;
   justify-content: space-between;
   background: #ffffff;
-  box-shadow: 0 10px 30px rgba(30, 30, 30, 0.08);
+  box-shadow: 0 10px 30px rgba(21, 26, 24, 0.08);
   opacity: 0;
   transform: translateY(-100%);
   pointer-events: none;
@@ -583,7 +583,7 @@ body.is-menu-closing .gnb-menu-button span { background: #ffffff; }
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(48, 226, 145, 0.24);
-  box-shadow: 0 26px 80px rgba(30, 30, 30, 0.14);
+  box-shadow: 0 26px 80px rgba(21, 26, 24, 0.14);
 }
 
 .external-notice-card p {
@@ -610,4 +610,16 @@ body.is-menu-closing .gnb-menu-button span { background: #ffffff; }
   .scroll-guide-card { min-width: 240px; padding: 18px 22px; }
   .end-cta { width: calc(100% - 48px); bottom: 72px; }
   .end-cta a { width: 100%; }
+}
+
+/* Minimal additions: external notice actions + brand cursor */
+.external-notice-card { text-align: center; }
+.external-notice-actions { margin-top: 24px; display: flex; justify-content: center; gap: 10px; }
+.external-notice-button { height: 46px; min-width: 104px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(21, 26, 24, 0.14); background: #ffffff; color: var(--black); font-size: 15px; font-weight: 850; cursor: pointer; }
+.external-notice-button.is-primary { border-color: var(--main-color); background: var(--main-color); color: #ffffff; }
+@media (hover: hover) and (pointer: fine) {
+  body.has-custom-cursor, body.has-custom-cursor * { cursor: none !important; }
+  .brand-cursor { position: fixed; left: 0; top: 0; z-index: 13000; width: 18px; height: 18px; border: 2px solid var(--main-color); border-radius: 999px; background: rgba(48, 226, 145, 0.12); pointer-events: none; opacity: 0; transform: translate3d(-50%, -50%, 0) scale(1); transition: width 180ms ease, height 180ms ease, background 180ms ease, border-color 180ms ease, opacity 180ms ease; }
+  .brand-cursor.is-visible { opacity: 1; }
+  .brand-cursor.is-hover { width: 42px; height: 42px; background: rgba(48, 226, 145, 0.2); }
 }

@@ -64,7 +64,16 @@
     <section id="resultSection" class="result-section"><div class="result-card"><div class="result-content"><p class="result-label">당신에게 어울리는 따릉이길은</p><p id="resultNumber" class="result-number"></p><h2 id="resultName"></h2><p id="resultDescription" class="result-description"></p><div id="resultTags" class="result-tags"></div><div class="result-meta"><div class="meta-card"><span>소요시간</span><strong id="resultTime"></strong></div><div class="meta-card"><span>거리</span><strong id="resultDistance"></strong></div></div><div class="result-actions"><a id="courseLink" href="#" class="primary-button">코스 자세히 보기</a><button id="restartButton" class="secondary-button" type="button">다시 찾아보기</button></div></div></div></section>
   </main>
 
-  <div id="externalNotice" class="external-notice"><div class="external-notice-card"><p>외부 페이지로 이동합니다.</p></div></div>
-  <script src="./find-course.js?v=20260616"></script>
+  <div id="externalNotice" class="external-notice" aria-hidden="true">
+    <div class="external-notice-card" role="dialog" aria-modal="true" aria-label="외부 페이지 이동 안내">
+      <p>외부 페이지로 이동합니다.</p>
+      <div class="external-notice-actions">
+        <button id="externalCancelButton" class="external-notice-button is-cancel" type="button">취소</button>
+        <button id="externalMoveButton" class="external-notice-button is-primary" type="button">이동하기</button>
+      </div>
+    </div>
+  </div>
+  <div id="brandCursor" class="brand-cursor" aria-hidden="true"></div>
+  <script src="./find-course.js?v=preserve-external-cursor"></script>
 </body>
 </html>

@@ -20,6 +20,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const resultDistance = document.querySelector('#resultDistance');
   const courseLink = document.querySelector('#courseLink');
   const externalNotice = document.querySelector('#externalNotice');
+  const externalCancelButton = document.querySelector('#externalCancelButton');
+  const externalMoveButton = document.querySelector('#externalMoveButton');
+  const brandCursor = document.querySelector('#brandCursor');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
 
   const menuDuration = 780;
@@ -29,6 +32,8 @@ window.addEventListener('DOMContentLoaded', () => {
   let selectedHistory = [];
   let isMenuOpen = false;
   let isMenuClosing = false;
+  let externalMoveTimer = null;
+  let pendingExternalUrl = '';
 
   const questions = [
     { title: '오늘은 어떤 분위기로 달리고 싶나요?', answers: [
@@ -101,10 +106,37 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function toggleMenu() { isMenuOpen ? closeMenu() : openMenu(); }
   function getCourseExternalLink(courseId) { return `https://www.sisul.or.kr/open_content/traffic/bike_course/view.html?id=${courseId}`; }
+  function hideExternalNotice() {
+    clearTimeout(externalMoveTimer);
+    externalMoveTimer = null;
+    pendingExternalUrl = '';
+    externalNotice?.classList.remove('is-visible');
+    externalNotice?.setAttribute('aria-hidden', 'true');
+  }
+  function moveToPendingExternalUrl() {
+    if (!pendingExternalUrl) return;
+    window.location.href = pendingExternalUrl;
+  }
   function showExternalNoticeAndMove(url) {
     if (!externalNotice) { window.location.href = url; return; }
+    clearTimeout(externalMoveTimer);
+    pendingExternalUrl = url;
     externalNotice.classList.add('is-visible');
-    setTimeout(() => { window.location.href = url; }, 1200);
+    externalNotice.setAttribute('aria-hidden', 'false');
+    externalMoveTimer = setTimeout(moveToPendingExternalUrl, 2200);
+  }
+  function initBrandCursor() {
+    if (!brandCursor || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    document.body.classList.add('has-custom-cursor');
+    window.addEventListener('mousemove', (event) => {
+      brandCursor.classList.add('is-visible');
+      brandCursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
+    });
+    window.addEventListener('mouseleave', () => brandCursor.classList.remove('is-visible'));
+    document.querySelectorAll('a, button, [role="button"]').forEach((element) => {
+      element.addEventListener('mouseenter', () => brandCursor.classList.add('is-hover'));
+      element.addEventListener('mouseleave', () => brandCursor.classList.remove('is-hover'));
+    });
   }
   function startRecommendation() {
     selectedTags = []; selectedHistory = []; currentQuestionIndex = 0;
@@ -182,11 +214,16 @@ window.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
   }
 
+  initBrandCursor();
+
   menuButton?.addEventListener('click', (event) => { event.preventDefault(); toggleMenu(); });
   startButton?.addEventListener('click', (event) => { event.preventDefault(); startRecommendation(); });
   prevButton?.addEventListener('click', moveToPrevQuestion);
   restartButton?.addEventListener('click', restartRecommendation);
   courseLink?.addEventListener('click', (event) => { event.preventDefault(); showExternalNoticeAndMove(courseLink.href); });
+  externalCancelButton?.addEventListener('click', hideExternalNotice);
+  externalMoveButton?.addEventListener('click', moveToPendingExternalUrl);
+
   courseIndexExternalLink?.addEventListener('click', (event) => {
     event.preventDefault();
     if (isMenuOpen) { closeMenu(() => showExternalNoticeAndMove(courseIndexUrl)); return; }

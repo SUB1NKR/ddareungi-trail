@@ -24,6 +24,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const externalCancelButton = document.querySelector('#externalCancelButton');
   const externalMoveButton = document.querySelector('#externalMoveButton');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
+  const brandCursor = document.querySelector('#brandCursor');
 
   const menuDuration = 780;
   const courseIndexUrl = 'https://www.sisul.or.kr/open_content/traffic/bike_course/index.html';
@@ -84,6 +85,33 @@ window.addEventListener('DOMContentLoaded', () => {
     {id:19,name:'물멍숲멍',description:'자양한강공원에서 물멍을 시작해 어린이대공원과 중랑천까지 이어지는 물과 숲의 힐링 코스입니다.',time:'51분',distance:'6km',image:'./assets/recommend/course-19.jpg',tags:['물멍','숲','힐링','한강','중랑천','자연','친구']},
     {id:20,name:'청계천 따라 따릉따릉',description:'청계천 옆 자전거길을 달리며 동대문, 종묘, 광화문 등 서울의 도심 풍경을 함께 구경할 수 있습니다.',time:'22분',distance:'5km',image:'./assets/recommend/course-20.jpg',tags:['청계천','도심','관광','천변','짧은거리','명소']}
   ];
+
+
+  function updateBrandCursor(event) {
+    if (!brandCursor) return;
+    brandCursor.style.setProperty('--cursor-x', `${event.clientX}px`);
+    brandCursor.style.setProperty('--cursor-y', `${event.clientY}px`);
+    brandCursor.classList.add('is-visible');
+  }
+
+  function hideBrandCursor() {
+    brandCursor?.classList.remove('is-visible');
+  }
+
+  function updateCursorHoverState(event) {
+    const hoverTarget = event.target.closest?.('a, button, .menu-link, .menu-sns-link');
+    document.body.classList.toggle('is-cursor-hover', Boolean(hoverTarget));
+  }
+
+  function initBrandCursor() {
+    if (!brandCursor || !window.matchMedia('(pointer: fine)').matches) return;
+    window.addEventListener('mousemove', updateBrandCursor);
+    window.addEventListener('mouseout', hideBrandCursor);
+    document.addEventListener('mouseover', updateCursorHoverState);
+    document.addEventListener('mouseout', updateCursorHoverState);
+    document.addEventListener('mousedown', () => document.body.classList.add('is-cursor-down'));
+    document.addEventListener('mouseup', () => document.body.classList.remove('is-cursor-down'));
+  }
 
   function openMenu() {
     if (!menuButton || !menuPanel || isMenuClosing) return;
@@ -218,6 +246,8 @@ window.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
   }
 
+
+  initBrandCursor();
 
   menuButton?.addEventListener('click', (event) => { event.preventDefault(); toggleMenu(); });
   startButton?.addEventListener('click', (event) => { event.preventDefault(); startRecommendation(); });

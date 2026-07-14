@@ -1,439 +1,366 @@
-window.addEventListener("DOMContentLoaded", () => {
+const adaptivePopup = document.querySelector('#adaptivePopup');
+const startButton = document.querySelector('#startButton');
+const loadingPage = document.querySelector('#loading');
+const slides = document.querySelectorAll('.safety-slide');
+const loadingFill = document.querySelector('#loadingFill');
+const gnb = document.querySelector('#gnb');
+const menuButton = document.querySelector('#menuButton');
+const menuPanel = document.querySelector('#menuPanel');
+const scrollGuide = document.querySelector('#scrollGuide');
+const endCta = document.querySelector('#endCta');
+const externalNotice = document.querySelector('#externalNotice');
+const externalCancelButton = document.querySelector('#externalCancelButton');
+const externalMoveButton = document.querySelector('#externalMoveButton');
+const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
+const canvas = document.querySelector('#sequenceCanvas');
+const cursor = document.querySelector('#brandCursor');
+
+const context = canvas ? canvas.getContext('2d') : null;
+
+const slideInterval = 2000;
+const totalLoadingTime = slides.length * slideInterval;
+const menuDuration = 780;
+const courseIndexUrl = 'https://www.sisul.or.kr/open_content/traffic/bike_course/index.html';
+
+const frameCount = 2552;
+const autoPlayEndFrame = 70;
+const autoPlayDelay = 1000;
+const autoPlayDuration = 2400;
+const framePath = './assets/frames/';
+const framePrefix = 'frame_';
+const frameExtension = '.webp';
+const canvasWidth = 1920;
+const canvasHeight = 980;
+
+let currentSlideIndex = 0;
+let slideTimer = null;
+let scrollGuideTimer = null;
+let isPageReady = false;
+let isAutoPlaying = false;
+let isMenuOpen = false;
+let isMenuClosing = false;
+let currentFrameIndex = -1;
+let externalTargetUrl = '';
+let scrollTween = null;
+
+const images = [];
+const sequence = { frame: autoPlayEndFrame };
+
+if (canvas) {
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function easeInOutCubic(value) {
+  return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+}
+
+function getFrameSrc(index) {
+  return `${framePath}${framePrefix}${String(index).padStart(3, '0')}${frameExtension}`;
+}
+
+function drawCoverImage(image) {
+  if (!context || !canvas || !image || !image.complete) return;
+
+  const imageRatio = image.naturalWidth / image.naturalHeight;
+  const canvasRatio = canvas.width / canvas.height;
+  let drawWidth = canvas.width;
+  let drawHeight = canvas.height;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  if (imageRatio > canvasRatio) {
+    drawHeight = canvas.height;
+    drawWidth = drawHeight * imageRatio;
+    offsetX = (canvas.width - drawWidth) / 2;
+  } else {
+    drawWidth = canvas.width;
+    drawHeight = drawWidth / imageRatio;
+    offsetY = (canvas.height - drawHeight) / 2;
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+}
+
+function renderFrame(frameIndex) {
+  const safeIndex = clamp(Math.round(frameIndex), 0, frameCount - 1);
+  if (safeIndex === currentFrameIndex && images[safeIndex]?.complete) return;
+
+  currentFrameIndex = safeIndex;
+  const image = images[safeIndex];
+
+  if (image && image.complete) {
+    drawCoverImage(image);
+  }
+
+  updateEndCta(safeIndex);
+}
+
+function preloadFrames() {
+  for (let i = 0; i < frameCount; i += 1) {
+    if (images[i]) continue;
+
+    const image = new Image();
+    image.src = getFrameSrc(i);
+    images[i] = image;
+  }
+
+  if (images[0]) {
+    images[0].onload = () => renderFrame(0);
+  }
+}
+
+function updateEndCta(frameIndex) {
+  if (!endCta) return;
+
+  if (frameIndex >= frameCount - 8) {
+    endCta.classList.add('is-visible');
+  } else {
+    endCta.classList.remove('is-visible');
+  }
+}
+
+function showGnb() {
+  gnb?.classList.add('is-visible');
+}
+
+function hideGnb() {
+  gnb?.classList.remove('is-visible');
+}
+
+function showScrollGuide() {
+  scrollGuide?.classList.add('is-visible');
+}
+
+function hideScrollGuide() {
+  scrollGuide?.classList.remove('is-visible');
+}
+
+function restartScrollGuideTimer() {
+  clearTimeout(scrollGuideTimer);
+  scrollGuideTimer = setTimeout(() => hideScrollGuide(), 4200);
+}
+
+function createScrollTrigger() {
+  if (!window.gsap || !window.ScrollTrigger) {
+    window.addEventListener('scroll', handleFallbackScroll, { passive: true });
+    return;
+  }
+
   gsap.registerPlugin(ScrollTrigger);
 
-  const adaptivePopup = document.querySelector("#adaptivePopup");
-  const startButton = document.querySelector("#startButton");
-  const loadingPage = document.querySelector("#loading");
-  const slides = document.querySelectorAll(".safety-slide");
-  const loadingFill = document.querySelector("#loadingFill");
+  scrollTween?.kill();
+  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 
-  const gnb = document.querySelector("#gnb");
-  const menuButton = document.querySelector("#menuButton");
-  const menuPanel = document.querySelector("#menuPanel");
+  sequence.frame = autoPlayEndFrame;
 
-  const canvas = document.querySelector("#sequenceCanvas");
-  const context = canvas.getContext("2d");
-  const scrollSection = document.querySelector("#scrollSection");
-  const scrollGuide = document.querySelector("#scrollGuide");
-  const endCta = document.querySelector("#endCta");
+  scrollTween = gsap.to(sequence, {
+    frame: frameCount - 1,
+    snap: 'frame',
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#scrollProxy',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1
+    },
+    onUpdate: () => renderFrame(sequence.frame)
+  });
 
-  const externalNotice = document.querySelector("#externalNotice");
-  const externalCancelButton = document.querySelector("#externalCancelButton");
-  const externalMoveButton = document.querySelector("#externalMoveButton");
-  const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+  ScrollTrigger.refresh();
+}
 
-  const customCursor = document.querySelector("#customCursor");
+function handleFallbackScroll() {
+  if (!isPageReady || isMenuOpen || isMenuClosing) return;
 
-  const frameCount = 2552;
-  const autoPlayEndFrame = 70;
-  const autoPlayDelay = 1000;
-  const autoPlayDuration = 2600;
-  const framePath = "./assets/frames/";
-  const framePrefix = "frame_";
-  const frameExtension = ".webp";
-  const canvasBaseWidth = 1920;
-  const canvasBaseHeight = 980;
-  const slideInterval = 2000;
-  const loadingTotalTime = Math.max(slides.length, 1) * slideInterval;
-  const menuDuration = 780;
-  const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  const progress = clamp(window.scrollY / maxScroll, 0, 1);
+  const frameRange = frameCount - 1 - autoPlayEndFrame;
+  renderFrame(autoPlayEndFrame + progress * frameRange);
+}
 
-  const images = [];
-  const sequence = { frame: 0 };
+function startFrameAutoPlay() {
+  preloadFrames();
+  window.scrollTo(0, 0);
 
-  let currentSlideIndex = 0;
-  let slideTimer = null;
-  let isMenuOpen = false;
-  let isMenuClosing = false;
-  let pendingExternalUrl = "";
-  let externalTimer = null;
-  let scrollTween = null;
-  let isSequenceReady = false;
-  let isAutoPlaying = false;
+  isAutoPlaying = true;
+  isPageReady = false;
+  hideGnb();
+  hideScrollGuide();
+  endCta?.classList.remove('is-visible');
 
-  function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-  }
+  renderFrame(0);
 
-  function easeInOutCubic(value) {
-    return value < 0.5
-      ? 4 * value * value * value
-      : 1 - Math.pow(-2 * value + 2, 3) / 2;
-  }
+  setTimeout(() => {
+    const startTime = performance.now();
 
-  function getFrameSrc(index) {
-    return `${framePath}${framePrefix}${String(index).padStart(3, "0")}${frameExtension}`;
-  }
+    function animate(now) {
+      const elapsed = now - startTime;
+      const progress = clamp(elapsed / autoPlayDuration, 0, 1);
+      const eased = easeInOutCubic(progress);
+      const frame = Math.round(eased * autoPlayEndFrame);
 
-  function loadImage(index) {
-    if (images[index]) return images[index];
+      renderFrame(frame);
 
-    const img = new Image();
-    img.src = getFrameSrc(index);
-    images[index] = img;
-
-    return img;
-  }
-
-  function preloadRange(start, end) {
-    const safeStart = clamp(start, 0, frameCount - 1);
-    const safeEnd = clamp(end, 0, frameCount - 1);
-
-    for (let i = safeStart; i <= safeEnd; i += 1) {
-      loadImage(i);
-    }
-  }
-
-  function preloadAllInBatches() {
-    let index = 0;
-    const batchSize = 32;
-
-    function batch() {
-      const end = Math.min(index + batchSize, frameCount);
-
-      for (; index < end; index += 1) {
-        loadImage(index);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+        return;
       }
 
-      if (index < frameCount) {
-        requestIdleCallback ? requestIdleCallback(batch) : setTimeout(batch, 16);
-      }
+      renderFrame(autoPlayEndFrame);
+      isAutoPlaying = false;
+      isPageReady = true;
+      showGnb();
+      showScrollGuide();
+      restartScrollGuideTimer();
+      createScrollTrigger();
     }
 
-    batch();
+    requestAnimationFrame(animate);
+  }, autoPlayDelay);
+}
+
+function startLoading() {
+  adaptivePopup?.classList.add('is-hidden');
+  loadingPage?.classList.add('is-visible');
+
+  if (loadingFill) {
+    loadingFill.style.animationDuration = `${totalLoadingTime}ms`;
+    loadingFill.classList.add('is-running');
   }
 
-  function resizeCanvas() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+  currentSlideIndex = 0;
+  slides.forEach((slide, index) => slide.classList.toggle('active', index === 0));
 
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
+  slideTimer = setInterval(() => {
+    slides[currentSlideIndex]?.classList.remove('active');
+    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+    slides[currentSlideIndex]?.classList.add('active');
+  }, slideInterval);
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    render();
-  }
-
-  function drawCover(image) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    const imageRatio = canvasBaseWidth / canvasBaseHeight;
-    const viewportRatio = viewportWidth / viewportHeight;
-
-    let drawWidth;
-    let drawHeight;
-    let offsetX;
-    let offsetY;
-
-    if (viewportRatio > imageRatio) {
-      drawWidth = viewportWidth;
-      drawHeight = viewportWidth / imageRatio;
-      offsetX = 0;
-      offsetY = (viewportHeight - drawHeight) / 2;
-    } else {
-      drawHeight = viewportHeight;
-      drawWidth = viewportHeight * imageRatio;
-      offsetX = (viewportWidth - drawWidth) / 2;
-      offsetY = 0;
-    }
-
-    context.clearRect(0, 0, viewportWidth, viewportHeight);
-    context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-  }
-
-  function render() {
-    const frameIndex = clamp(Math.round(sequence.frame), 0, frameCount - 1);
-    const image = loadImage(frameIndex);
-
-    if (!image || !image.complete) {
-      image.onload = render;
-      return;
-    }
-
-    drawCover(image);
-    updateEndCta(frameIndex);
-  }
-
-  function updateEndCta(frameIndex) {
-    if (!endCta) return;
-
-    const shouldShow = isSequenceReady && !isAutoPlaying && frameIndex >= frameCount - 8;
-
-    endCta.classList.toggle("is-visible", shouldShow);
-  }
-
-  function setupScrollTrigger() {
-    if (scrollTween) {
-      scrollTween.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    }
-
-    scrollTween = gsap.to(sequence, {
-      frame: frameCount - 1,
-      snap: "frame",
-      ease: "none",
-      paused: false,
-      scrollTrigger: {
-        trigger: scrollSection,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1,
-        invalidateOnRefresh: true,
-        onUpdate: () => {
-          if (!isSequenceReady || isAutoPlaying) return;
-          render();
-        }
-      }
-    });
-
-    ScrollTrigger.refresh();
-  }
-
-  function setScrollToFrame(frameIndex) {
-    const trigger = ScrollTrigger.getAll()[0];
-    if (!trigger) return;
-
-    const progress = frameIndex / (frameCount - 1);
-    const targetScroll = trigger.start + (trigger.end - trigger.start) * progress;
-
-    window.scrollTo(0, targetScroll);
-  }
-
-  function showGnb() {
-    gnb?.classList.add("is-visible");
-  }
-
-  function hideGnb() {
-    gnb?.classList.remove("is-visible");
-  }
-
-  function showScrollGuide() {
-    scrollGuide?.classList.add("is-visible");
-  }
-
-  function hideScrollGuide() {
-    scrollGuide?.classList.remove("is-visible");
-  }
-
-  function startAutoPlay() {
-    isAutoPlaying = true;
-    isSequenceReady = false;
-
-    hideScrollGuide();
-    hideGnb();
-    endCta?.classList.remove("is-visible");
-
-    canvas.classList.add("is-visible");
-    sequence.frame = 0;
-    render();
-
-    setTimeout(() => {
-      const startTime = performance.now();
-
-      function animate(now) {
-        const elapsed = now - startTime;
-        const progress = clamp(elapsed / autoPlayDuration, 0, 1);
-        const eased = easeInOutCubic(progress);
-
-        sequence.frame = Math.round(eased * autoPlayEndFrame);
-        render();
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-          return;
-        }
-
-        sequence.frame = autoPlayEndFrame;
-        render();
-
-        isAutoPlaying = false;
-        isSequenceReady = true;
-
-        setupScrollTrigger();
-        setScrollToFrame(autoPlayEndFrame);
-
-        showGnb();
-        showScrollGuide();
-        gnb?.classList.add("is-solid");
-      }
-
-      requestAnimationFrame(animate);
-    }, autoPlayDelay);
-  }
-
-  function startLoading() {
-    adaptivePopup?.classList.add("is-hidden");
-    loadingPage?.classList.add("is-visible");
-
+  setTimeout(() => {
     clearInterval(slideTimer);
+    loadingPage?.classList.remove('is-visible');
+    loadingPage?.classList.add('is-hidden');
+    startFrameAutoPlay();
+  }, totalLoadingTime);
+}
 
-    currentSlideIndex = 0;
-    slides.forEach((slide, index) => {
-      slide.classList.toggle("is-active", index === 0);
-    });
+function skipLoadingAndStart() {
+  adaptivePopup?.classList.add('is-hidden');
+  loadingPage?.classList.add('is-hidden');
+  startFrameAutoPlay();
+}
 
-    if (loadingFill) {
-      loadingFill.style.width = "0%";
-      requestAnimationFrame(() => {
-        loadingFill.style.width = "100%";
-      });
-    }
+function openMenu() {
+  if (!menuButton || !menuPanel || isMenuClosing) return;
 
-    slideTimer = setInterval(() => {
-      slides[currentSlideIndex]?.classList.remove("is-active");
-      currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-      slides[currentSlideIndex]?.classList.add("is-active");
-    }, slideInterval);
+  isMenuOpen = true;
+  isMenuClosing = false;
+  document.body.classList.add('is-menu-open');
+  document.body.classList.remove('is-menu-closing');
+  menuPanel.classList.remove('is-closing');
+  menuPanel.classList.add('is-open');
+  menuButton.classList.add('is-open');
+  menuButton.setAttribute('aria-label', '메뉴 닫기');
+}
 
-    setTimeout(() => {
-      clearInterval(slideTimer);
-      loadingPage?.classList.remove("is-visible");
-      loadingPage?.classList.add("is-hidden");
-      startAutoPlay();
-    }, loadingTotalTime);
-  }
+function closeMenu(callback) {
+  if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
 
-  function skipLoadingAndStart() {
-    adaptivePopup?.classList.add("is-hidden");
-    loadingPage?.classList.add("is-hidden");
-    startAutoPlay();
-  }
+  isMenuOpen = false;
+  isMenuClosing = true;
+  document.body.classList.remove('is-menu-open');
+  document.body.classList.add('is-menu-closing');
+  menuPanel.classList.remove('is-open');
+  menuPanel.classList.add('is-closing');
 
-  function openMenu() {
-    if (!menuButton || !menuPanel || isMenuClosing) return;
-
-    isMenuOpen = true;
+  setTimeout(() => {
     isMenuClosing = false;
+    menuPanel.classList.remove('is-closing');
+    menuButton.classList.remove('is-open');
+    menuButton.setAttribute('aria-label', '메뉴 열기');
+    document.body.classList.remove('is-menu-closing');
 
-    document.body.classList.add("is-menu-open");
-    document.body.classList.remove("is-menu-closing");
+    if (typeof callback === 'function') callback();
+  }, menuDuration);
+}
 
-    menuPanel.classList.remove("is-closing");
-    menuPanel.classList.add("is-open");
+function toggleMenu() {
+  if (isMenuOpen) closeMenu();
+  else openMenu();
+}
 
-    menuButton.classList.add("is-open");
-    menuButton.setAttribute("aria-label", "메뉴 닫기");
-  }
+function openExternalNotice(url) {
+  externalTargetUrl = url;
+  externalNotice?.classList.add('is-visible');
+  externalNotice?.setAttribute('aria-hidden', 'false');
+}
 
-  function closeMenu(callback) {
-    if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
+function closeExternalNotice() {
+  externalTargetUrl = '';
+  externalNotice?.classList.remove('is-visible');
+  externalNotice?.setAttribute('aria-hidden', 'true');
+}
 
-    isMenuOpen = false;
-    isMenuClosing = true;
+function moveToExternalTarget() {
+  if (!externalTargetUrl) return;
+  window.location.href = externalTargetUrl;
+}
 
-    document.body.classList.remove("is-menu-open");
-    document.body.classList.add("is-menu-closing");
+function initCursor() {
+  if (!cursor || window.matchMedia('(pointer: coarse)').matches) return;
 
-    menuPanel.classList.remove("is-open");
-    menuPanel.classList.add("is-closing");
-
-    setTimeout(() => {
-      isMenuClosing = false;
-
-      menuPanel.classList.remove("is-closing");
-      menuButton.classList.remove("is-open");
-      menuButton.setAttribute("aria-label", "메뉴 열기");
-      document.body.classList.remove("is-menu-closing");
-
-      if (typeof callback === "function") callback();
-    }, menuDuration);
-  }
-
-  function toggleMenu() {
-    if (isMenuOpen) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
-  }
-
-  function showExternalNotice(url) {
-    pendingExternalUrl = url;
-    externalNotice?.classList.add("is-visible");
-
-    clearTimeout(externalTimer);
-  }
-
-  function hideExternalNotice() {
-    pendingExternalUrl = "";
-    externalNotice?.classList.remove("is-visible");
-
-    clearTimeout(externalTimer);
-  }
-
-  function moveExternalNow() {
-    if (!pendingExternalUrl) return;
-    window.location.href = pendingExternalUrl;
-  }
-
-  function initCustomCursor() {
-    if (!customCursor) return;
-
-    window.addEventListener("mousemove", (event) => {
-      customCursor.style.left = `${event.clientX}px`;
-      customCursor.style.top = `${event.clientY}px`;
-    });
-
-    document.querySelectorAll("a, button").forEach((element) => {
-      element.addEventListener("mouseenter", () => {
-        document.body.classList.add("is-cursor-hover");
-      });
-
-      element.addEventListener("mouseleave", () => {
-        document.body.classList.remove("is-cursor-hover");
-      });
-    });
-  }
-
-  function initPage() {
-    resizeCanvas();
-    preloadRange(0, Math.min(autoPlayEndFrame + 20, frameCount - 1));
-    preloadAllInBatches();
-
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.get("skipLoading") === "1") {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      skipLoadingAndStart();
-      return;
-    }
-
-    adaptivePopup?.classList.remove("is-hidden");
-  }
-
-  startButton?.addEventListener("click", startLoading);
-  menuButton?.addEventListener("click", toggleMenu);
-
-  courseIndexExternalLink?.addEventListener("click", (event) => {
-    event.preventDefault();
-
-    if (isMenuOpen) {
-      closeMenu(() => showExternalNotice(courseIndexUrl));
-      return;
-    }
-
-    showExternalNotice(courseIndexUrl);
+  window.addEventListener('mousemove', (event) => {
+    cursor.classList.add('is-visible');
+    cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -50%)`;
   });
 
-  externalCancelButton?.addEventListener("click", hideExternalNotice);
-  externalMoveButton?.addEventListener("click", moveExternalNow);
-
-  window.addEventListener("resize", () => {
-    resizeCanvas();
-    ScrollTrigger.refresh();
+  document.querySelectorAll('a, button, .menu-link, .menu-sns-link').forEach((element) => {
+    element.addEventListener('mouseenter', () => cursor.classList.add('is-hover'));
+    element.addEventListener('mouseleave', () => cursor.classList.remove('is-hover'));
   });
+}
 
-  window.addEventListener("scroll", () => {
-    if (!gnb) return;
-    gnb.classList.toggle("is-solid", window.scrollY > 40);
-  });
+function initPage() {
+  preloadFrames();
+  renderFrame(0);
+  hideGnb();
+  hideScrollGuide();
 
-  initCustomCursor();
-  initPage();
+  const params = new URLSearchParams(window.location.search);
+  const shouldSkipLoading = params.get('skipLoading') === '1';
+
+  if (shouldSkipLoading) {
+    params.delete('skipLoading');
+    const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', cleanUrl);
+    skipLoadingAndStart();
+  }
+
+  initCursor();
+}
+
+menuButton?.addEventListener('click', toggleMenu);
+startButton?.addEventListener('click', startLoading);
+courseIndexExternalLink?.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (isMenuOpen) {
+    closeMenu(() => openExternalNotice(courseIndexUrl));
+    return;
+  }
+  openExternalNotice(courseIndexUrl);
 });
+externalCancelButton?.addEventListener('click', closeExternalNotice);
+externalMoveButton?.addEventListener('click', moveToExternalTarget);
+
+window.addEventListener('resize', () => {
+  renderFrame(currentFrameIndex < 0 ? 0 : currentFrameIndex);
+});
+
+initPage();

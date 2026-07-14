@@ -20,7 +20,7 @@ const slideInterval = 2000;
 const totalLoadingTime = Math.max(slides.length * slideInterval, 1200);
 const menuDuration = 780;
 const introPlaySeconds = 2;
-const scrollScreens = 32;
+const scrollScreens = 56;
 const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 let currentSlideIndex = 0;
@@ -46,10 +46,12 @@ let videoScrubRaf = null;
 let smoothScrollTargetY = 0;
 let smoothScrollCurrentY = 0;
 let smoothScrollRaf = null;
-const videoScrubEase = 0.055;
-const videoSeekThreshold = 0.006;
-const smoothScrollEase = 0.115;
-const wheelScrollMultiplier = 0.92;
+const videoScrubEase = 0.085;
+const videoSeekThreshold = 0.028;
+const videoSeekInterval = 42;
+const smoothScrollEase = 0.075;
+const wheelScrollMultiplier = 0.52;
+let lastVideoSeekTime = 0;
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -90,7 +92,7 @@ function getScrubDuration() {
 function startVideoScrubEase() {
   if (videoScrubRaf || !mainVideo) return;
 
-  const tick = () => {
+  const tick = (now) => {
     if (!mainVideo) {
       videoScrubRaf = null;
       return;
@@ -102,37 +104,47 @@ function startVideoScrubEase() {
     }
 
     const scrubDuration = getScrubDuration();
-    if (scrubDuration <= 0) {
+    if (scrubDuration <= 0 || !Number.isFinite(mainVideo.duration)) {
       videoScrubRaf = null;
       return;
     }
 
     const progressDiff = targetScrollProgress - easedScrollProgress;
+    easedScrollProgress = clamp(easedScrollProgress + progressDiff * videoScrubEase, 0, 1);
 
-    if (Math.abs(progressDiff) <= 0.00055) {
-      easedScrollProgress = targetScrollProgress;
-      targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
+    targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
+    targetVideoTime = clamp(targetVideoTime, introPlaySeconds, mainVideo.duration);
 
-      if (Math.abs(mainVideo.currentTime - targetVideoTime) > videoSeekThreshold) {
-        mainVideo.currentTime = clamp(targetVideoTime, introPlaySeconds, mainVideo.duration || targetVideoTime);
+    const currentDiff = targetVideoTime - mainVideo.currentTime;
+    const canSeek = now - lastVideoSeekTime >= videoSeekInterval;
+
+    // Apple 사이트처럼 보이도록 currentTime을 매 프레임 강제로 꽂지 않고,
+    // eased progress를 먼저 만든 뒤 24fps 안팎으로만 seek합니다.
+    // 이 방식이 WebM/MP4 디코더 과부하와 툭툭 끊기는 느낌을 줄입니다.
+    if (canSeek && Math.abs(currentDiff) > videoSeekThreshold) {
+      const nextTime = clamp(
+        mainVideo.currentTime + currentDiff * 0.34,
+        introPlaySeconds,
+        mainVideo.duration
+      );
+
+      if (typeof mainVideo.fastSeek === "function" && Math.abs(currentDiff) > 0.9) {
+        mainVideo.fastSeek(nextTime);
+      } else {
+        mainVideo.currentTime = nextTime;
       }
 
-      updateEndCta(easedScrollProgress);
+      lastVideoSeekTime = now;
+    }
+
+    updateEndCta(easedScrollProgress);
+
+    if (Math.abs(progressDiff) < 0.00028 && Math.abs(currentDiff) < 0.035) {
+      easedScrollProgress = targetScrollProgress;
       videoScrubRaf = null;
       return;
     }
 
-    // 스크롤 위치와 영상 시간을 동시에 부드럽게 보간합니다.
-    // wheel 입력 → smooth scroll → eased progress → video currentTime 순서로 처리해
-    // currentTime이 큰 폭으로 튀는 현상을 줄입니다.
-    easedScrollProgress = clamp(easedScrollProgress + progressDiff * videoScrubEase, 0, 1);
-    targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
-
-    if (Math.abs(mainVideo.currentTime - targetVideoTime) > videoSeekThreshold) {
-      mainVideo.currentTime = clamp(targetVideoTime, introPlaySeconds, mainVideo.duration || targetVideoTime);
-    }
-
-    updateEndCta(easedScrollProgress);
     videoScrubRaf = requestAnimationFrame(tick);
   };
 
@@ -256,7 +268,7 @@ function startSmoothScrollEase() {
 
     const diff = smoothScrollTargetY - smoothScrollCurrentY;
 
-    if (Math.abs(diff) < 0.45) {
+    if (Math.abs(diff) < 0.38) {
       smoothScrollCurrentY = smoothScrollTargetY;
       window.scrollTo(0, smoothScrollCurrentY);
       smoothScrollRaf = null;
@@ -265,6 +277,8 @@ function startSmoothScrollEase() {
 
     smoothScrollCurrentY += diff * smoothScrollEase;
     window.scrollTo(0, smoothScrollCurrentY);
+    targetScrollProgress = clamp(smoothScrollCurrentY / getScrollableDistance(), 0, 1);
+    startVideoScrubEase();
     smoothScrollRaf = requestAnimationFrame(tick);
   };
 
@@ -275,8 +289,17 @@ function handleSmoothWheel(event) {
   if (!canUseSmoothScroll()) return;
 
   event.preventDefault();
-  smoothScrollTargetY = clamp(smoothScrollTargetY + event.deltaY * wheelScrollMultiplier, 0, getMaxPageScroll());
+
+  const delta = Math.sign(event.deltaY) * Math.min(Math.abs(event.deltaY), window.innerHeight * 0.42);
+  smoothScrollTargetY = clamp(
+    smoothScrollTargetY + delta * wheelScrollMultiplier,
+    0,
+    getMaxPageScroll()
+  );
+
+  targetScrollProgress = clamp(smoothScrollTargetY / getScrollableDistance(), 0, 1);
   startSmoothScrollEase();
+  startVideoScrubEase();
 }
 
 function handleSmoothKey(event) {
@@ -319,9 +342,33 @@ function handlePageScroll() {
   });
 }
 
+let touchStartY = 0;
+let touchLastY = 0;
+
+function handleSmoothTouchStart(event) {
+  if (!canUseSmoothScroll() || !event.touches || event.touches.length !== 1) return;
+  touchStartY = event.touches[0].clientY;
+  touchLastY = touchStartY;
+  syncSmoothScrollPosition();
+}
+
+function handleSmoothTouchMove(event) {
+  if (!canUseSmoothScroll() || !event.touches || event.touches.length !== 1) return;
+  event.preventDefault();
+  const currentY = event.touches[0].clientY;
+  const delta = touchLastY - currentY;
+  touchLastY = currentY;
+  smoothScrollTargetY = clamp(smoothScrollTargetY + delta * 1.15, 0, getMaxPageScroll());
+  targetScrollProgress = clamp(smoothScrollTargetY / getScrollableDistance(), 0, 1);
+  startSmoothScrollEase();
+  startVideoScrubEase();
+}
+
 function startScrollProtection() {
   window.addEventListener("wheel", preventScrollInput, { passive: false });
   window.addEventListener("touchmove", preventScrollInput, { passive: false });
+  window.addEventListener("touchstart", handleSmoothTouchStart, { passive: true });
+  window.addEventListener("touchmove", handleSmoothTouchMove, { passive: false });
   window.addEventListener("keydown", preventScrollKey);
   window.addEventListener("wheel", handleSmoothWheel, { passive: false });
   window.addEventListener("keydown", handleSmoothKey);
@@ -346,7 +393,7 @@ function openExternalNotice(url) {
 
   if (!externalNotice) {
     externalNoticeTimer = setTimeout(() => {
-      window.location.href = url;
+      window.location.assign(url);
     }, 2000);
     return;
   }
@@ -363,7 +410,7 @@ function openExternalNotice(url) {
     const targetUrl = pendingExternalUrl;
     if (!targetUrl) return;
     pendingExternalUrl = "";
-    window.location.href = targetUrl;
+    window.location.assign(targetUrl);
   }, 2000);
 }
 
@@ -388,7 +435,7 @@ function confirmExternalMove() {
   if (!url) return closeExternalNotice();
   pendingExternalUrl = "";
   clearTimeout(externalNoticeTimer);
-  window.location.href = url;
+  window.location.assign(url);
 }
 
 function startMainVideoFlow() {

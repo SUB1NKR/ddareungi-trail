@@ -530,3 +530,174 @@
     background: #FFFFFF !important;
   }
 }
+
+
+/* =========================
+   5차 수정사항: cursor / notice final override
+========================= */
+.main-video {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.external-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 19000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(245, 255, 249, 0.22);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.external-notice.is-visible {
+  opacity: 1;
+}
+
+.external-notice-card {
+  position: relative;
+  width: min(420px, calc(100vw - 40px));
+  min-height: 168px;
+  padding: 34px 60px 34px 34px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(48, 226, 145, 0.34);
+  box-shadow: 0 28px 90px rgba(21, 99, 64, 0.18);
+  transform: translateY(14px) scale(0.98);
+  transition: transform 360ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.external-notice.is-visible .external-notice-card {
+  transform: translateY(0) scale(1);
+}
+
+.external-notice-eyebrow {
+  margin: 0 0 16px;
+  color: #30E291;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.external-notice-card h2 {
+  margin: 0;
+  color: #1e1e1e;
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 1.22;
+  font-weight: 900;
+  word-break: keep-all;
+}
+
+.external-notice-close {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: #30E291;
+  color: #156340;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.external-notice-close:hover {
+  transform: rotate(90deg) scale(1.04);
+  background: #156340;
+  color: #fff;
+}
+
+.external-notice-description,
+.external-notice-actions,
+.notice-secondary,
+.notice-primary {
+  display: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body,
+  a,
+  button,
+  [role="button"],
+  .menu-link,
+  .menu-sns-link,
+  .gnb-menu-button,
+  .popup-button,
+  .primary-button,
+  .secondary-button,
+  .answer-button,
+  .result-button,
+  .course-card,
+  .external-notice-close {
+    cursor: none !important;
+  }
+
+  .custom-cursor {
+    width: 42px !important;
+    height: 42px !important;
+    border: 2.6px solid #30E291 !important;
+    border-radius: 999px !important;
+    background: rgba(48, 226, 145, 0.075) !important;
+    box-shadow: 0 0 0 1px rgba(48, 226, 145, 0.10) !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .custom-cursor .custom-cursor__dot {
+    width: 6px !important;
+    height: 6px !important;
+    background: #30E291 !important;
+  }
+
+  .custom-cursor.is-hover {
+    width: 62px !important;
+    height: 62px !important;
+    border-color: #156340 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: difference !important;
+  }
+
+  .custom-cursor.is-hover .custom-cursor__dot {
+    width: 8px !important;
+    height: 8px !important;
+    background: #156340 !important;
+  }
+
+  body.is-menu-open .custom-cursor,
+  body.is-menu-closing .custom-cursor {
+    border-color: #FFFFFF !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: difference !important;
+  }
+
+  body.is-menu-open .custom-cursor .custom-cursor__dot,
+  body.is-menu-closing .custom-cursor .custom-cursor__dot {
+    background: #FFFFFF !important;
+  }
+
+  body.is-menu-open .custom-cursor.is-hover,
+  body.is-menu-closing .custom-cursor.is-hover {
+    border-color: #FFFFFF !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: difference !important;
+  }
+
+  body.is-menu-open .custom-cursor.is-hover .custom-cursor__dot,
+  body.is-menu-closing .custom-cursor.is-hover .custom-cursor__dot {
+    background: #FFFFFF !important;
+  }
+}

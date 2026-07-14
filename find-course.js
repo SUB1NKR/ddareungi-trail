@@ -12,6 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const questionCount = document.querySelector('#questionCount');
   const questionTitle = document.querySelector('#questionTitle');
   const answerList = document.querySelector('#answerList');
+  const resultImage = document.querySelector('#resultImage');
   const resultNumber = document.querySelector('#resultNumber');
   const resultName = document.querySelector('#resultName');
   const resultDescription = document.querySelector('#resultDescription');
@@ -23,7 +24,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const externalCancelButton = document.querySelector('#externalCancelButton');
   const externalMoveButton = document.querySelector('#externalMoveButton');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
-  const cursor = document.querySelector('#brandCursor');
 
   const menuDuration = 780;
   const courseIndexUrl = 'https://www.sisul.or.kr/open_content/traffic/bike_course/index.html';
@@ -32,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let selectedHistory = [];
   let isMenuOpen = false;
   let isMenuClosing = false;
+  let externalMoveTimer = null;
   let externalTargetUrl = '';
 
   const questions = [
@@ -106,36 +107,23 @@ window.addEventListener('DOMContentLoaded', () => {
   function toggleMenu() { isMenuOpen ? closeMenu() : openMenu(); }
   function getCourseExternalLink(courseId) { return `https://www.sisul.or.kr/open_content/traffic/bike_course/view.html?id=${courseId}`; }
   function showExternalNoticeAndMove(url) {
+    if (!externalNotice) { window.location.href = url; return; }
     externalTargetUrl = url;
-    externalNotice?.classList.add('is-visible');
-    externalNotice?.setAttribute('aria-hidden', 'false');
+    externalNotice.classList.add('is-visible');
+    clearTimeout(externalMoveTimer);
+    externalMoveTimer = setTimeout(() => { window.location.href = externalTargetUrl; }, 1600);
   }
-
-  function closeExternalNotice() {
+  function cancelExternalMove() {
+    clearTimeout(externalMoveTimer);
+    externalMoveTimer = null;
     externalTargetUrl = '';
     externalNotice?.classList.remove('is-visible');
-    externalNotice?.setAttribute('aria-hidden', 'true');
   }
-
-  function moveToExternalTarget() {
+  function moveExternalNow() {
     if (!externalTargetUrl) return;
+    clearTimeout(externalMoveTimer);
     window.location.href = externalTargetUrl;
   }
-
-  function initCursor() {
-    if (!cursor || window.matchMedia('(pointer: coarse)').matches) return;
-
-    window.addEventListener('mousemove', (event) => {
-      cursor.classList.add('is-visible');
-      cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px) translate(-50%, -50%)`;
-    });
-
-    document.querySelectorAll('a, button, .menu-link, .menu-sns-link').forEach((element) => {
-      element.addEventListener('mouseenter', () => cursor.classList.add('is-hover'));
-      element.addEventListener('mouseleave', () => cursor.classList.remove('is-hover'));
-    });
-  }
-
   function startRecommendation() {
     selectedTags = []; selectedHistory = []; currentQuestionIndex = 0;
     introSection.style.display = 'none';
@@ -194,6 +182,10 @@ window.addEventListener('DOMContentLoaded', () => {
     resultSection.classList.remove('is-entering');
     resultSection.classList.add('is-visible');
     resultSection.style.setProperty('--result-bg-image', `url("${bestCourse.image}")`);
+    if (resultImage) {
+      resultImage.src = bestCourse.image;
+      resultImage.alt = `${bestCourse.id}번 코스 ${bestCourse.name}`;
+    }
     resultNumber.textContent = `${bestCourse.id}번 코스`;
     resultName.textContent = bestCourse.name;
     resultDescription.textContent = bestCourse.description;
@@ -212,18 +204,36 @@ window.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
   }
 
+  function initCustomCursor() {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    const cursor = document.createElement('div');
+    cursor.className = 'brand-cursor';
+    document.body.appendChild(cursor);
+    document.body.classList.add('has-brand-cursor');
+    window.addEventListener('mousemove', (event) => {
+      cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`;
+    });
+    document.addEventListener('mouseover', (event) => {
+      if (event.target.closest('a, button, .menu-link')) cursor.classList.add('is-hover');
+    });
+    document.addEventListener('mouseout', (event) => {
+      if (event.target.closest('a, button, .menu-link')) cursor.classList.remove('is-hover');
+    });
+  }
+
+  initCustomCursor();
+
   menuButton?.addEventListener('click', (event) => { event.preventDefault(); toggleMenu(); });
   startButton?.addEventListener('click', (event) => { event.preventDefault(); startRecommendation(); });
   prevButton?.addEventListener('click', moveToPrevQuestion);
   restartButton?.addEventListener('click', restartRecommendation);
   courseLink?.addEventListener('click', (event) => { event.preventDefault(); showExternalNoticeAndMove(courseLink.href); });
-  externalCancelButton?.addEventListener('click', closeExternalNotice);
-  externalMoveButton?.addEventListener('click', moveToExternalTarget);
+  externalCancelButton?.addEventListener('click', cancelExternalMove);
+  externalMoveButton?.addEventListener('click', moveExternalNow);
+
   courseIndexExternalLink?.addEventListener('click', (event) => {
     event.preventDefault();
     if (isMenuOpen) { closeMenu(() => showExternalNoticeAndMove(courseIndexUrl)); return; }
     showExternalNoticeAndMove(courseIndexUrl);
   });
-
-  initCursor();
 });

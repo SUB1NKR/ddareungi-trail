@@ -1,17 +1,22 @@
 window.addEventListener("DOMContentLoaded", () => {
   const menuButton = document.querySelector("#menuButton");
   const menuPanel = document.querySelector("#menuPanel");
+
   const startButton = document.querySelector("#startButton");
   const prevButton = document.querySelector("#prevButton");
   const restartButton = document.querySelector("#restartButton");
+
   const introSection = document.querySelector("#introSection");
   const questionSection = document.querySelector("#questionSection");
   const findingSection = document.querySelector("#findingSection");
   const resultSection = document.querySelector("#resultSection");
+
   const progressBar = document.querySelector("#progressBar");
   const questionCount = document.querySelector("#questionCount");
   const questionTitle = document.querySelector("#questionTitle");
   const answerList = document.querySelector("#answerList");
+
+  const resultImage = document.querySelector("#resultImage");
   const resultNumber = document.querySelector("#resultNumber");
   const resultName = document.querySelector("#resultName");
   const resultDescription = document.querySelector("#resultDescription");
@@ -19,14 +24,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const resultTime = document.querySelector("#resultTime");
   const resultDistance = document.querySelector("#resultDistance");
   const courseLink = document.querySelector("#courseLink");
+
   const externalNotice = document.querySelector("#externalNotice");
-  const externalNoticeClose = document.querySelector("#externalNoticeClose");
-  const externalNoticeCancel = document.querySelector("#externalNoticeCancel");
-  const externalNoticeConfirm = document.querySelector("#externalNoticeConfirm");
+  const externalCancelButton = document.querySelector("#externalCancelButton");
+  const externalMoveButton = document.querySelector("#externalMoveButton");
   const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+  const customCursor = document.querySelector("#customCursor");
 
   const menuDuration = 780;
   const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
+
   let currentQuestionIndex = 0;
   let selectedTags = [];
   let selectedHistory = [];
@@ -35,235 +42,338 @@ window.addEventListener("DOMContentLoaded", () => {
   let pendingExternalUrl = "";
 
   const questions = [
-    { title: "오늘은 어떤 분위기로 달리고 싶나요?", answers: [
-      { text: "조용히 쉬어가는 힐링 라이딩", tags: ["힐링", "자연", "쉼"] },
-      { text: "서울의 풍경을 크게 보고 싶어요", tags: ["한강", "풍경", "전망"] },
-      { text: "도심과 명소를 함께 둘러보고 싶어요", tags: ["도심", "관광", "명소"] },
-      { text: "밤공기와 야경을 즐기고 싶어요", tags: ["야경", "밤", "낭만"] }
-    ]},
-    { title: "어떤 길이 가장 끌리나요?", answers: [
-      { text: "강바람이 부는 한강길", tags: ["한강", "강바람", "자전거도로"] },
-      { text: "꽃과 나무가 많은 길", tags: ["꽃", "숲", "자연"] },
-      { text: "천을 따라 이어지는 길", tags: ["천변", "하천", "물멍"] },
-      { text: "서울의 도시감이 느껴지는 길", tags: ["도심", "도시", "관광"] }
-    ]},
-    { title: "누구와 함께 달릴 예정인가요?", answers: [
-      { text: "혼자 가볍게", tags: ["혼자", "힐링", "짧은거리"] },
-      { text: "연인과 데이트로", tags: ["데이트", "낭만", "풍경"] },
-      { text: "친구와 활기차게", tags: ["친구", "활기", "탐험"] },
-      { text: "퇴근 후 나를 위해", tags: ["퇴근", "야경", "힐링"] }
-    ]},
-    { title: "어느 정도 달리고 싶나요?", answers: [
-      { text: "짧고 가볍게", tags: ["짧은거리"] },
-      { text: "30분 안팎으로 적당히", tags: ["중간거리"] },
-      { text: "한강 따라 길게", tags: ["긴거리", "한강"] },
-      { text: "안전한 자전거도로 위주로", tags: ["안전", "자전거도로"] }
-    ]}
+    {
+      title: "오늘은 어떤 분위기로 달리고 싶나요?",
+      answers: [
+        { text: "조용히 쉬어가는 힐링 라이딩", tags: ["힐링", "자연", "쉼"] },
+        { text: "서울의 풍경을 크게 보고 싶어요", tags: ["한강", "풍경", "전망"] },
+        { text: "도심과 명소를 함께 둘러보고 싶어요", tags: ["도심", "관광", "명소"] },
+        { text: "밤공기와 야경을 즐기고 싶어요", tags: ["야경", "밤", "낭만"] }
+      ]
+    },
+    {
+      title: "어떤 길이 가장 끌리나요?",
+      answers: [
+        { text: "강바람이 부는 한강길", tags: ["한강", "강바람", "자전거도로"] },
+        { text: "꽃과 나무가 많은 길", tags: ["꽃", "숲", "자연"] },
+        { text: "천을 따라 이어지는 길", tags: ["천변", "하천", "물멍"] },
+        { text: "서울의 도시감이 느껴지는 길", tags: ["도심", "도시", "관광"] }
+      ]
+    },
+    {
+      title: "누구와 함께 달릴 예정인가요?",
+      answers: [
+        { text: "혼자 가볍게", tags: ["혼자", "힐링", "짧은거리"] },
+        { text: "연인과 데이트로", tags: ["데이트", "낭만", "풍경"] },
+        { text: "친구와 활기차게", tags: ["친구", "활기", "탐험"] },
+        { text: "퇴근 후 나를 위해", tags: ["퇴근", "야경", "힐링"] }
+      ]
+    },
+    {
+      title: "어느 정도 달리고 싶나요?",
+      answers: [
+        { text: "짧고 가볍게", tags: ["짧은거리"] },
+        { text: "30분 안팎으로 적당히", tags: ["중간거리"] },
+        { text: "한강 따라 길게", tags: ["긴거리", "한강"] },
+        { text: "안전한 자전거도로 위주로", tags: ["안전", "자전거도로"] }
+      ]
+    }
   ];
 
   const courses = [
-    [1,"도심 속 메타세쿼이아 숲길 따라 따릉이가 간다~","월드컵공원 메타세쿼이아 숲길과 난지한강공원을 함께 느낄 수 있는 짧고 편안한 힐링 코스입니다.","14분","5km","course-01.jpg",["숲","자연","쉼","힐링","짧은거리","강바람","혼자"]],
-    [2,"불광천 따릉이길","불광천과 한강, 망원 일대를 함께 즐길 수 있는 산책형 코스입니다.","25분","6km","course-02.jpg",["벚꽃","천변","하천","데이트","중간거리","꽃"]],
-    [3,"용산에서 노들섬, 여의도까지 자전거로 한번에!","용산역에서 노들섬과 여의도한강공원까지 이어지는 피크닉 감성 코스입니다.","23분","5km","course-03.jpg",["한강","풍경","데이트","힐링","짧은거리","명소"]],
-    [4,"고궁, 도시 그리고 자연을 달리는 서울 한 줄 요약길.","경복궁, 광화문, 서울역, 용산, 이촌한강공원까지 서울의 고궁과 도심, 자연을 만나는 코스입니다.","37분","9km","course-04.jpg",["도심","관광","명소","도시","긴거리","풍경"]],
-    [5,"한강공원으로 즐기는 따릉이길","가양동에서 여의도까지 한강공원과 더현대를 함께 즐길 수 있는 나들이 코스입니다.","35분","8km","course-05.jpg",["한강","데이트","나들이","풍경","중간거리","명소"]],
-    [6,"한강 따라 자전거공원 따릉따릉","대부분 자전거도로로 이루어져 안전하게 달리기 좋고 샛강 생태공원도 느낄 수 있습니다.","34분","9km","course-06.jpg",["한강","안전","자전거도로","자연","중간거리","힐링"]],
-    [7,"야경이 아름다운 따릉이 퇴근길","한강변을 따라 야경과 건강한 하루 마무리를 함께 즐길 수 있는 퇴근길 코스입니다.","48분","13km","course-07.jpg",["야경","퇴근","한강","밤","긴거리","낭만","안전"]],
-    [8,"홍제천 폭포에서 경의선 숲길 따라, 젊음의 홍대로 도심으로","홍제천 폭포와 경의선숲길, 연희동과 홍대까지 이어지는 도심 탐험 코스입니다.","28분","8km","course-08.jpg",["천변","숲","도심","친구","탐험","중간거리","꽃"]],
-    [9,"마포대교를 건너며 느끼는 여의도와 한강","마포대교를 건너며 여의도와 한강의 바람, 노을과 야경을 느낄 수 있는 짧은 코스입니다.","17분","4km","course-09.jpg",["한강","강바람","전망","짧은거리","풍경","낭만"]],
-    [10,"청계천에서 중랑천을 따라 한강까지","청계천에서 중랑천을 지나 한강까지 이어지는 물길 중심 코스입니다.","26분","6km","course-10.jpg",["청계천","중랑천","하천","천변","한강","중간거리"]],
-    [11,"따릉이와 함께 하는 한강 야경 여행","뚝섬유원지역에서 반포대교, 노들섬까지 이어지는 한강 야경 감상 코스입니다.","57분","13km","course-11.jpg",["야경","한강","밤","낭만","긴거리","자전거도로"]],
-    [12,"초록이 깃든 길","성내천의 벚꽃과 다양한 식물을 함께 만날 수 있는 초록 힐링 코스입니다.","17분","4km","course-12.jpg",["힐링","꽃","자연","짧은거리","도시","자전거도로"]],
-    [13,"탁트인 목가적 풍경길","탄천길에서 한강자전거길로 이어지며 탁 트인 풍경을 만나는 코스입니다.","32분","5km","course-13.jpg",["탄천","한강","풍경","전망","자연","중간거리"]],
-    [14,"탄천따라 따릉따릉","탄천의 경관과 도심 속 자연을 느끼며 가볍게 달릴 수 있는 짧은 코스입니다.","15분","4km","course-14.jpg",["탄천","자연","하천","짧은거리","힐링","혼자"]],
-    [15,"여의천, 양재천과 탄천을따라 한강까지 즐기는 따릉이길","여의천, 양재천, 탄천을 지나 한강까지 이어지는 긴 자연 코스입니다.","1시간 7분","20km","course-15.jpg",["긴거리","한강","하천","자연","안전","자전거도로"]],
-    [16,"7호선 꽃구경! 장미꽃, 벚꽃길, 그리고 중랑천","벚꽃과 중랑장미공원을 함께 만나는 꽃구경 중심의 중랑천 코스입니다.","37분","9km","course-16.jpg",["꽃","벚꽃","장미","중랑천","천변","중간거리"]],
-    [17,"비바람 안 맞고 달리는 8km 코스 아시나요?","도림천의 지붕 덮인 자전거도로를 따라 달릴 수 있는 색다른 안전 코스입니다.","42분","10km","course-17.jpg",["안전","자전거도로","도림천","하천","색다른","중간거리"]],
-    [18,"힐링 출퇴근길 따릉이길","안양천을 따라 출퇴근 스트레스를 덜고 꽃길을 만날 수 있는 직장인 힐링 코스입니다.","23분","6km","course-18.jpg",["퇴근","힐링","꽃","안양천","천변","중간거리","안전"]],
-    [19,"물멍숲멍","자양한강공원에서 어린이대공원과 중랑천까지 이어지는 물과 숲의 힐링 코스입니다.","51분","6km","course-19.jpg",["물멍","숲","힐링","한강","중랑천","자연"]],
-    [20,"청계천 따라 따릉따릉","청계천 옆 자전거길을 달리며 동대문, 종묘, 광화문 등 도심 풍경을 구경할 수 있습니다.","22분","5km","course-20.jpg",["청계천","도심","관광","천변","짧은거리","명소"]]
-  ].map(([id,name,description,time,distance,img,tags]) => ({id,name,description,time,distance,image:`./assets/recommend/${img}`,tags}));
+    { id: 1, name: "도심 속 메타세쿼이아 숲길 따라 따릉이가 간다~", description: "월드컵공원 메타세쿼이아 숲길과 난지한강공원을 함께 느낄 수 있는 짧고 편안한 힐링 코스입니다.", time: "14분", distance: "5km", image: "./assets/recommend/course-01.jpg", tags: ["숲", "자연", "쉼", "힐링", "짧은거리", "강바람", "혼자"] },
+    { id: 2, name: "불광천 따릉이길", description: "봄에는 벚꽃이 피고, 불광천과 한강, 망원재래시장과 망리단길까지 함께 즐길 수 있는 산책형 코스입니다.", time: "25분", distance: "6km", image: "./assets/recommend/course-02.jpg", tags: ["벚꽃", "천변", "하천", "동네", "데이트", "중간거리", "꽃"] },
+    { id: 3, name: "용산에서 노들섬, 여의도까지 자전거로 한번에!", description: "용산역에서 노들섬과 여의도한강공원까지 이어지는 코스로, 한강 풍경과 피크닉 감성을 함께 즐길 수 있습니다.", time: "23분", distance: "5km", image: "./assets/recommend/course-03.jpg", tags: ["한강", "풍경", "데이트", "힐링", "짧은거리", "명소"] },
+    { id: 4, name: "고궁, 도시 그리고 자연을 달리는 서울 한 줄 요약길.", description: "경복궁, 광화문, 덕수궁, 서울역, 용산, 이촌한강공원까지 서울의 고궁과 도심, 자연을 한 번에 만나는 코스입니다.", time: "37분", distance: "9km", image: "./assets/recommend/course-04.jpg", tags: ["도심", "관광", "명소", "도시", "긴거리", "풍경"] },
+    { id: 5, name: "한강공원으로 즐기는 따릉이길", description: "가양동에서 여의도까지 한강공원과 더현대를 함께 즐길 수 있어 연인과 나들이하기 좋은 코스입니다.", time: "35분", distance: "8km", image: "./assets/recommend/course-05.jpg", tags: ["한강", "데이트", "나들이", "풍경", "중간거리", "명소"] },
+    { id: 6, name: "한강 따라 자전거공원 따릉따릉", description: "대부분 자전거도로로 이루어져 안전하게 달리기 좋고, 샛강 생태공원의 신선한 공기까지 느낄 수 있습니다.", time: "34분", distance: "9km", image: "./assets/recommend/course-06.jpg", tags: ["한강", "안전", "자전거도로", "자연", "중간거리", "힐링"] },
+    { id: 7, name: "야경이 아름다운 따릉이 퇴근길", description: "강남과 여의도를 잇는 한강변 퇴근길 코스로, 야경과 건강한 하루 마무리를 함께 즐길 수 있습니다.", time: "48분", distance: "13km", image: "./assets/recommend/course-07.jpg", tags: ["야경", "퇴근", "한강", "밤", "긴거리", "낭만", "안전"] },
+    { id: 8, name: "홍제천 폭포에서 경의선 숲길 따라, 젊음의 홍대로 도심으로", description: "홍제천 폭포와 경의선숲길, 연희동과 홍대까지 이어지는 젊고 활기 있는 도심 탐험 코스입니다.", time: "28분", distance: "8km", image: "./assets/recommend/course-08.jpg", tags: ["천변", "숲", "도심", "친구", "탐험", "중간거리", "꽃"] },
+    { id: 9, name: "마포대교를 건너며 느끼는 여의도와 한강", description: "마포대교를 건너며 여의도와 한강의 풍경, 바람, 노을과 야경까지 다양하게 느낄 수 있는 짧은 코스입니다.", time: "17분", distance: "4km", image: "./assets/recommend/course-09.jpg", tags: ["한강", "강바람", "전망", "짧은거리", "풍경", "낭만"] },
+    { id: 10, name: "청계천에서 중랑천을 따라 한강까지", description: "청계천에서 중랑천을 지나 한강까지 이어지는 물길 중심 코스로, 서울의 대표 하천을 가까이 느낄 수 있습니다.", time: "26분", distance: "6km", image: "./assets/recommend/course-10.jpg", tags: ["청계천", "중랑천", "하천", "천변", "한강", "중간거리"] },
+    { id: 11, name: "따릉이와 함께 하는 한강 야경 여행", description: "뚝섬유원지역에서 동호대교, 반포대교 무지개분수, 노들섬까지 이어지는 한강 야경 감상 코스입니다.", time: "57분", distance: "13km", image: "./assets/recommend/course-11.jpg", tags: ["야경", "한강", "밤", "낭만", "긴거리", "자전거도로", "풍경"] },
+    { id: 12, name: "초록이 깃든 길", description: "JYP 사옥과 제2롯데월드를 잇고, 성내천의 벚꽃과 다양한 식물을 함께 만날 수 있는 초록 힐링 코스입니다.", time: "17분", distance: "4km", image: "./assets/recommend/course-12.jpg", tags: ["힐링", "꽃", "자연", "짧은거리", "도시", "자전거도로"] },
+    { id: 13, name: "탁트인 목가적 풍경길", description: "탄천길에서 한강자전거길로 이어지며 미루나무, 강물, 잠실 일대의 탁 트인 풍경을 만나는 코스입니다.", time: "32분", distance: "5km", image: "./assets/recommend/course-13.jpg", tags: ["탄천", "한강", "풍경", "전망", "자연", "중간거리"] },
+    { id: 14, name: "탄천따라 따릉따릉", description: "탄천의 아름다운 경관과 도심 속 자연을 느끼며 가볍게 달릴 수 있는 짧은 자연 코스입니다.", time: "15분", distance: "4km", image: "./assets/recommend/course-14.jpg", tags: ["탄천", "자연", "하천", "짧은거리", "힐링", "혼자"] },
+    { id: 15, name: "여의천, 양재천과 탄천을따라 한강까지 즐기는 따릉이길", description: "여의천, 양재천, 탄천을 지나 한강까지 이어지는 긴 코스로, 자연과 강바람을 충분히 즐길 수 있습니다.", time: "1시간 7분", distance: "20km", image: "./assets/recommend/course-15.jpg", tags: ["긴거리", "한강", "하천", "자연", "안전", "자전거도로"] },
+    { id: 16, name: "7호선 꽃구경! 장미꽃, 벚꽃길, 그리고 중랑천", description: "송정제방길의 벚꽃과 중랑장미공원을 함께 만나는 꽃구경 중심의 중랑천 자전거 코스입니다.", time: "37분", distance: "9km", image: "./assets/recommend/course-16.jpg", tags: ["꽃", "벚꽃", "장미", "중랑천", "천변", "중간거리", "자연"] },
+    { id: 17, name: "비바람 안 맞고 달리는 8km 코스 아시나요?", description: "도림천의 지붕 덮인 자전거도로를 따라 비바람과 더위를 피하며 달릴 수 있는 색다른 안전 코스입니다.", time: "42분", distance: "10km", image: "./assets/recommend/course-17.jpg", tags: ["안전", "자전거도로", "도림천", "하천", "밤", "색다른", "중간거리"] },
+    { id: 18, name: "힐링 출퇴근길 따릉이길", description: "안양천을 따라 출퇴근 스트레스를 덜고, 튤립과 벚꽃, 장미꽃길을 만날 수 있는 직장인 힐링 코스입니다.", time: "23분", distance: "6km", image: "./assets/recommend/course-18.jpg", tags: ["퇴근", "힐링", "꽃", "안양천", "천변", "중간거리", "안전"] },
+    { id: 19, name: "물멍숲멍", description: "자양한강공원에서 물멍을 시작해 어린이대공원과 중랑천까지 이어지는 물과 숲의 힐링 코스입니다.", time: "51분", distance: "6km", image: "./assets/recommend/course-19.jpg", tags: ["물멍", "숲", "힐링", "한강", "중랑천", "자연", "친구"] },
+    { id: 20, name: "청계천 따라 따릉따릉", description: "청계천 옆 자전거길을 달리며 동대문, 종묘, 광화문 등 서울의 도심 풍경을 함께 구경할 수 있습니다.", time: "22분", distance: "5km", image: "./assets/recommend/course-20.jpg", tags: ["청계천", "도심", "관광", "천변", "짧은거리", "명소"] }
+  ];
 
-  function openMenu(){if(!menuButton||!menuPanel||isMenuClosing)return;isMenuOpen=true;isMenuClosing=false;document.body.classList.add("is-menu-open");document.body.classList.remove("is-menu-closing");menuPanel.classList.remove("is-closing");menuPanel.classList.add("is-open");menuButton.classList.add("is-open");menuButton.setAttribute("aria-label","메뉴 닫기")}
-  function closeMenu(callback){if(!menuButton||!menuPanel||!isMenuOpen||isMenuClosing)return;isMenuOpen=false;isMenuClosing=true;document.body.classList.remove("is-menu-open");document.body.classList.add("is-menu-closing");menuPanel.classList.remove("is-open");menuPanel.classList.add("is-closing");setTimeout(()=>{isMenuClosing=false;menuPanel.classList.remove("is-closing");menuButton.classList.remove("is-open");menuButton.setAttribute("aria-label","메뉴 열기");document.body.classList.remove("is-menu-closing");if(typeof callback==="function")callback()},menuDuration)}
-  function toggleMenu(){isMenuOpen?closeMenu():openMenu()}
-  function getCourseExternalLink(id){return `https://www.sisul.or.kr/open_content/traffic/bike_course/view.html?id=${id}`}
-  function openExternalNotice(url){if(!url)return;pendingExternalUrl=url;clearTimeout(externalNoticeTimer);document.body.classList.add("is-modal-open");if(!externalNotice){externalNoticeTimer=setTimeout(()=>{window.location.href=url},2000);return}externalNotice.style.display="flex";externalNotice.setAttribute("aria-hidden","false");externalNotice.classList.remove("is-closing");requestAnimationFrame(()=>externalNotice.classList.add("is-visible"));externalNoticeTimer=setTimeout(()=>{const targetUrl=pendingExternalUrl;if(!targetUrl)return;pendingExternalUrl="";window.location.href=targetUrl},2000)}
-  function closeExternalNotice(){clearTimeout(externalNoticeTimer);pendingExternalUrl="";document.body.classList.remove("is-modal-open");externalNotice?.classList.remove("is-visible");externalNotice?.setAttribute("aria-hidden","true");if(externalNotice){setTimeout(()=>{if(!externalNotice.classList.contains("is-visible"))externalNotice.style.display="none"},260)}}
-  function confirmExternalMove(){const url=pendingExternalUrl;if(!url)return closeExternalNotice();pendingExternalUrl="";clearTimeout(externalNoticeTimer);window.location.href=url}
+  function openMenu() {
+    if (!menuButton || !menuPanel || isMenuClosing) return;
 
-  function startRecommendation(){selectedTags=[];selectedHistory=[];currentQuestionIndex=0;introSection.style.display="none";resultSection.classList.remove("is-visible","is-entering");findingSection.classList.remove("is-visible");questionSection.classList.add("is-visible");window.scrollTo(0,0);renderQuestion()}
-  function renderQuestion(){const q=questions[currentQuestionIndex];progressBar.style.width=`${((currentQuestionIndex+1)/questions.length)*100}%`;questionCount.textContent=`${currentQuestionIndex+1} / ${questions.length}`;questionTitle.textContent=q.title;answerList.innerHTML="";q.answers.forEach(answer=>{const b=document.createElement("button");b.type="button";b.className="answer-button";b.textContent=answer.text;b.addEventListener("click",()=>{selectedTags=selectedTags.concat(answer.tags);selectedHistory.push(answer.tags);moveToNextQuestion()});answerList.appendChild(b)});prevButton.disabled=currentQuestionIndex===0}
-  function moveToNextQuestion(){currentQuestionIndex+=1;if(currentQuestionIndex>=questions.length){questionSection.classList.remove("is-visible");findingSection.classList.add("is-visible");window.scrollTo(0,0);setTimeout(showResultWithTransition,2000);return}renderQuestion()}
-  function moveToPrevQuestion(){if(currentQuestionIndex<=0)return;const last=selectedHistory.pop();if(last){last.forEach(tag=>{const i=selectedTags.lastIndexOf(tag);if(i!==-1)selectedTags.splice(i,1)})}currentQuestionIndex-=1;renderQuestion()}
-  function getBestCourse(){return courses.map(course=>{let score=0;selectedTags.forEach(tag=>{if(course.tags.includes(tag))score+=2;if(course.name.includes(tag)||course.description.includes(tag))score+=1});return{course,score}}).sort((a,b)=>b.score-a.score||a.course.id-b.course.id)[0].course}
-  function showResultWithTransition(){findingSection.classList.remove("is-visible");setTimeout(showResult,520)}
-  function showResult(){const c=getBestCourse();resultSection.classList.remove("is-entering");resultSection.classList.add("is-visible");resultSection.style.setProperty("--result-bg-image",`url("${c.image}")`);resultNumber.textContent=`${c.id}번 코스`;resultName.textContent=c.name;resultDescription.textContent=c.description;resultTags.innerHTML="";c.tags.slice(0,6).forEach(tag=>{const el=document.createElement("span");el.className="result-tag";el.textContent=`#${tag}`;resultTags.appendChild(el)});resultTime.textContent=c.time;resultDistance.textContent=c.distance;courseLink.href=getCourseExternalLink(c.id);window.scrollTo(0,0);requestAnimationFrame(()=>resultSection.classList.add("is-entering"))}
-  function restartRecommendation(){resultSection.classList.remove("is-visible","is-entering");findingSection.classList.remove("is-visible");questionSection.classList.remove("is-visible");introSection.style.display="flex";selectedTags=[];selectedHistory=[];currentQuestionIndex=0;window.scrollTo(0,0)}
+    isMenuOpen = true;
+    isMenuClosing = false;
 
-  menuButton?.addEventListener("click", e=>{e.preventDefault();toggleMenu()});
-  startButton?.addEventListener("click", e=>{e.preventDefault();startRecommendation()});
+    document.body.classList.add("is-menu-open");
+    document.body.classList.remove("is-menu-closing");
+
+    menuPanel.classList.remove("is-closing");
+    menuPanel.classList.add("is-open");
+
+    menuButton.classList.add("is-open");
+    menuButton.setAttribute("aria-label", "메뉴 닫기");
+  }
+
+  function closeMenu(callback) {
+    if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
+
+    isMenuOpen = false;
+    isMenuClosing = true;
+
+    document.body.classList.remove("is-menu-open");
+    document.body.classList.add("is-menu-closing");
+
+    menuPanel.classList.remove("is-open");
+    menuPanel.classList.add("is-closing");
+
+    setTimeout(() => {
+      isMenuClosing = false;
+
+      menuPanel.classList.remove("is-closing");
+      menuButton.classList.remove("is-open");
+      menuButton.setAttribute("aria-label", "메뉴 열기");
+      document.body.classList.remove("is-menu-closing");
+
+      if (typeof callback === "function") callback();
+    }, menuDuration);
+  }
+
+  function toggleMenu() {
+    if (isMenuOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  }
+
+  function getCourseExternalLink(courseId) {
+    return `https://www.sisul.or.kr/open_content/traffic/bike_course/view.html?id=${courseId}`;
+  }
+
+  function showExternalNotice(url) {
+    pendingExternalUrl = url;
+    externalNotice?.classList.add("is-visible");
+  }
+
+  function hideExternalNotice() {
+    pendingExternalUrl = "";
+    externalNotice?.classList.remove("is-visible");
+  }
+
+  function moveExternalNow() {
+    if (!pendingExternalUrl) return;
+    window.location.href = pendingExternalUrl;
+  }
+
+  function startRecommendation() {
+    selectedTags = [];
+    selectedHistory = [];
+    currentQuestionIndex = 0;
+
+    introSection.style.display = "none";
+    resultSection.classList.remove("is-visible", "is-entering");
+    findingSection.classList.remove("is-visible");
+    questionSection.classList.add("is-visible");
+
+    window.scrollTo(0, 0);
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const question = questions[currentQuestionIndex];
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+    questionCount.textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+    questionTitle.textContent = question.title;
+    progressBar.style.width = `${progress}%`;
+
+    answerList.innerHTML = "";
+
+    question.answers.forEach((answer) => {
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.className = "answer-button";
+      button.textContent = answer.text;
+
+      button.addEventListener("click", () => {
+        selectedTags = selectedTags.concat(answer.tags);
+        selectedHistory.push(answer.tags);
+        moveToNextQuestion();
+      });
+
+      answerList.appendChild(button);
+    });
+
+    prevButton.disabled = currentQuestionIndex === 0;
+  }
+
+  function moveToNextQuestion() {
+    currentQuestionIndex += 1;
+
+    if (currentQuestionIndex >= questions.length) {
+      questionSection.classList.remove("is-visible");
+      findingSection.classList.add("is-visible");
+
+      window.scrollTo(0, 0);
+
+      setTimeout(() => {
+        showResultWithTransition();
+      }, 2000);
+
+      return;
+    }
+
+    renderQuestion();
+  }
+
+  function moveToPrevQuestion() {
+    if (currentQuestionIndex <= 0) return;
+
+    const lastTags = selectedHistory.pop();
+
+    if (lastTags) {
+      lastTags.forEach((tag) => {
+        const tagIndex = selectedTags.lastIndexOf(tag);
+
+        if (tagIndex !== -1) selectedTags.splice(tagIndex, 1);
+      });
+    }
+
+    currentQuestionIndex -= 1;
+    renderQuestion();
+  }
+
+  function getBestCourse() {
+    const scores = courses.map((course) => {
+      let score = 0;
+
+      selectedTags.forEach((tag) => {
+        if (course.tags.includes(tag)) score += 2;
+      });
+
+      [...new Set(selectedTags)].forEach((tag) => {
+        if (course.name.includes(tag) || course.description.includes(tag)) score += 1;
+      });
+
+      return { course, score };
+    });
+
+    scores.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.course.id - b.course.id;
+    });
+
+    return scores[0].course;
+  }
+
+  function showResultWithTransition() {
+    findingSection.classList.remove("is-visible");
+
+    setTimeout(() => {
+      showResult();
+    }, 520);
+  }
+
+  function showResult() {
+    const bestCourse = getBestCourse();
+
+    resultSection.classList.remove("is-entering");
+    resultSection.classList.add("is-visible");
+
+    resultImage.src = bestCourse.image;
+    resultImage.alt = `${bestCourse.id}번 코스 ${bestCourse.name}`;
+
+    resultNumber.textContent = `${bestCourse.id}번 코스`;
+    resultName.textContent = bestCourse.name;
+    resultDescription.textContent = bestCourse.description;
+
+    resultTags.innerHTML = "";
+
+    bestCourse.tags.slice(0, 6).forEach((tag) => {
+      const tagElement = document.createElement("span");
+      tagElement.className = "result-tag";
+      tagElement.textContent = `#${tag}`;
+      resultTags.appendChild(tagElement);
+    });
+
+    resultTime.textContent = bestCourse.time;
+    resultDistance.textContent = bestCourse.distance;
+    courseLink.href = getCourseExternalLink(bestCourse.id);
+
+    window.scrollTo(0, 0);
+
+    requestAnimationFrame(() => {
+      resultSection.classList.add("is-entering");
+    });
+  }
+
+  function restartRecommendation() {
+    resultSection.classList.remove("is-visible", "is-entering");
+    findingSection.classList.remove("is-visible");
+    questionSection.classList.remove("is-visible");
+
+    introSection.style.display = "flex";
+
+    selectedTags = [];
+    selectedHistory = [];
+    currentQuestionIndex = 0;
+
+    window.scrollTo(0, 0);
+  }
+
+  function initCustomCursor() {
+    if (!customCursor) return;
+
+    window.addEventListener("mousemove", (event) => {
+      customCursor.style.left = `${event.clientX}px`;
+      customCursor.style.top = `${event.clientY}px`;
+    });
+
+    document.querySelectorAll("a, button").forEach((element) => {
+      element.addEventListener("mouseenter", () => {
+        document.body.classList.add("is-cursor-hover");
+      });
+
+      element.addEventListener("mouseleave", () => {
+        document.body.classList.remove("is-cursor-hover");
+      });
+    });
+  }
+
+  menuButton?.addEventListener("click", toggleMenu);
+
+  startButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    startRecommendation();
+  });
+
   prevButton?.addEventListener("click", moveToPrevQuestion);
   restartButton?.addEventListener("click", restartRecommendation);
-  courseLink?.addEventListener("click", e=>{e.preventDefault();openExternalNotice(courseLink.href)});
-  courseIndexExternalLink?.addEventListener("click", e=>{e.preventDefault();const open=()=>openExternalNotice(courseIndexUrl);isMenuOpen?closeMenu(open):open()});
-  externalNoticeClose?.addEventListener("click", closeExternalNotice);
-  externalNoticeCancel?.addEventListener("click", closeExternalNotice);
-  externalNoticeConfirm?.addEventListener("click", confirmExternalMove);
-/* =========================
-     Smooth Custom Cursor
-  ========================= */
-  function initCustomCursor() {
-    const cursor = document.querySelector("#customCursor");
-    if (!cursor) return;
-  
-    const canUseCustomCursor = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (!canUseCustomCursor) return;
-  
-    let targetX = window.innerWidth / 2;
-    let targetY = window.innerHeight / 2;
-    let currentX = targetX;
-    let currentY = targetY;
-    let isStarted = false;
-  
-    const hoverTargets = [
-      "a",
-      "button",
-      "[role='button']",
-      ".gnb-menu-button",
-      ".menu-link",
-      ".menu-sns-link",
-      ".popup-button",
-      ".primary-button",
-      ".secondary-button",
-      ".answer-button",
-      ".result-button",
-      ".course-card",
-      ".external-notice-close",
-      ".notice-secondary",
-      ".notice-primary"
-    ].join(",");
-  
-    function animateCursor() {
-      currentX += (targetX - currentX) * 0.17;
-      currentY += (targetY - currentY) * 0.17;
-      cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
-      requestAnimationFrame(animateCursor);
+
+  courseLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    showExternalNotice(courseLink.href);
+  });
+
+  courseIndexExternalLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (isMenuOpen) {
+      closeMenu(() => showExternalNotice(courseIndexUrl));
+      return;
     }
-  
-    function startCursor() {
-      cursor.classList.add("is-visible");
-      if (isStarted) return;
-      isStarted = true;
-      requestAnimationFrame(animateCursor);
-    }
-  
-    window.addEventListener("mousemove", (event) => {
-      targetX = event.clientX;
-      targetY = event.clientY;
-      startCursor();
-    }, { passive: true });
-  
-    window.addEventListener("mousedown", () => {
-      cursor.classList.add("is-pressed");
-    });
-  
-    window.addEventListener("mouseup", () => {
-      cursor.classList.remove("is-pressed");
-    });
-  
-    document.addEventListener("mouseover", (event) => {
-      if (event.target.closest(hoverTargets)) {
-        cursor.classList.add("is-hover");
-      }
-    });
-  
-    document.addEventListener("mouseout", (event) => {
-      if (event.target.closest(hoverTargets)) {
-        cursor.classList.remove("is-hover");
-      }
-    });
-  
-    document.addEventListener("mouseleave", () => {
-      cursor.classList.remove("is-visible", "is-hover", "is-pressed");
-    });
-  }
+
+    showExternalNotice(courseIndexUrl);
+  });
+
+  externalCancelButton?.addEventListener("click", hideExternalNotice);
+  externalMoveButton?.addEventListener("click", moveExternalNow);
 
   initCustomCursor();
-  externalNotice?.addEventListener("click", e=>{if(e.target===externalNotice)closeExternalNotice()});
 });
-
-/* =========================
-   Smooth Custom Cursor
-========================= */
-function initCustomCursor() {
-  const cursor = document.querySelector("#customCursor");
-  if (!cursor) return;
-
-  const canUseCustomCursor = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  if (!canUseCustomCursor) return;
-
-  let targetX = window.innerWidth / 2;
-  let targetY = window.innerHeight / 2;
-  let currentX = targetX;
-  let currentY = targetY;
-  let isStarted = false;
-
-  const hoverTargets = [
-    "a",
-    "button",
-    "[role='button']",
-    ".gnb-menu-button",
-    ".menu-link",
-    ".menu-sns-link",
-    ".popup-button",
-    ".primary-button",
-    ".secondary-button",
-    ".answer-button",
-    ".result-button",
-    ".course-card",
-    ".external-notice-close",
-    ".notice-secondary",
-    ".notice-primary"
-  ].join(",");
-
-  function animateCursor() {
-    currentX += (targetX - currentX) * 0.17;
-    currentY += (targetY - currentY) * 0.17;
-    cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
-    requestAnimationFrame(animateCursor);
-  }
-
-  function startCursor() {
-    cursor.classList.add("is-visible");
-    if (isStarted) return;
-    isStarted = true;
-    requestAnimationFrame(animateCursor);
-  }
-
-  function updateHoverState(event) {
-    const target = event.target.closest(hoverTargets);
-    cursor.classList.toggle("is-hover", Boolean(target));
-  }
-
-  window.addEventListener("mousemove", (event) => {
-    targetX = event.clientX;
-    targetY = event.clientY;
-    startCursor();
-    updateHoverState(event);
-  }, { passive: true });
-
-  window.addEventListener("mousedown", () => {
-    cursor.classList.add("is-pressed");
-  });
-
-  window.addEventListener("mouseup", () => {
-    cursor.classList.remove("is-pressed");
-  });
-
-  document.addEventListener("mouseleave", () => {
-    cursor.classList.remove("is-visible", "is-hover", "is-pressed");
-  });
-}
-
-initCustomCursor();

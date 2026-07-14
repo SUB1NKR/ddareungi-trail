@@ -449,7 +449,7 @@ body.is-menu-closing .gnb-menu-button span { background: #ffffff; }
   position: relative;
   z-index: 0;
   width: 100%;
-  height: 2100vh;
+  height: 3000vh;
   pointer-events: none;
 }
 
@@ -692,4 +692,187 @@ body.is-menu-closing .gnb-menu-button span { background: #ffffff; }
 @media (max-width: 768px) {
   .end-cta { bottom: 54px; }
   .end-cta-card { padding: 30px 22px; }
+}
+
+
+/* 3차 수정사항: 텍스트 자간/행간 점검 보정 */
+body {
+  letter-spacing: -0.012em;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.popup-card h1,
+.end-cta p,
+.menu-link,
+.scroll-guide-title {
+  letter-spacing: -0.035em;
+}
+
+.popup-description,
+.scroll-guide-subtitle,
+.external-notice-card p,
+.end-cta-subcopy {
+  letter-spacing: -0.018em;
+  line-height: 1.62;
+}
+
+.menu-link {
+  line-height: 0.98;
+}
+
+.menu-copyright {
+  letter-spacing: 0.01em;
+}
+
+/* 3차 수정사항: 마지막 CTA를 페이지 전체 연출로 확장 */
+.end-cta {
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  bottom: auto;
+  justify-content: center;
+  gap: 0;
+  overflow: hidden;
+}
+
+.end-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 26%, rgba(48, 226, 145, 0.24), transparent 22%),
+    radial-gradient(circle at 82% 78%, rgba(48, 226, 145, 0.18), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(245, 255, 249, 0.86));
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.end-cta.is-visible::before {
+  opacity: 1;
+}
+
+.end-cta-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.end-cta-orbit {
+  position: absolute;
+  border-radius: 999px;
+  border: 2px solid rgba(48, 226, 145, 0.28);
+  box-shadow: inset 0 0 0 14px rgba(48, 226, 145, 0.04);
+}
+
+.orbit-one {
+  width: 34vw;
+  height: 34vw;
+  min-width: 360px;
+  min-height: 360px;
+  left: -9vw;
+  bottom: -13vw;
+}
+
+.orbit-two {
+  width: 26vw;
+  height: 26vw;
+  min-width: 260px;
+  min-height: 260px;
+  right: -7vw;
+  top: 12vh;
+}
+
+.end-cta-route {
+  position: absolute;
+  height: 2px;
+  border-radius: 999px;
+  background-image: linear-gradient(90deg, rgba(48, 226, 145, 0), rgba(48, 226, 145, 0.72), rgba(48, 226, 145, 0));
+  transform-origin: center;
+}
+
+.route-one {
+  width: 46vw;
+  left: 8vw;
+  top: 34vh;
+  transform: rotate(-12deg);
+}
+
+.route-two {
+  width: 52vw;
+  right: 5vw;
+  bottom: 27vh;
+  transform: rotate(9deg);
+}
+
+.end-cta-card {
+  z-index: 2;
+  width: min(840px, calc(100% - 72px));
+  padding: clamp(36px, 4.8vw, 68px) clamp(30px, 5vw, 72px);
+  border-radius: clamp(32px, 4vw, 56px);
+  border: 1px solid rgba(48, 226, 145, 0.34);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 34px 100px rgba(21, 26, 24, 0.16),
+    inset 0 0 0 10px rgba(48, 226, 145, 0.055);
+  backdrop-filter: blur(18px);
+}
+
+.end-cta-card::before {
+  width: 120px;
+  height: 120px;
+  left: -44px;
+  top: -48px;
+}
+
+.end-cta-card::after {
+  width: 150px;
+  height: 150px;
+  right: -54px;
+  bottom: -62px;
+}
+
+.end-cta p {
+  margin-top: 20px;
+  font-size: clamp(34px, 4.4vw, 76px);
+  line-height: 1.08;
+}
+
+.end-cta-subcopy {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  margin: 18px auto 0;
+  display: block;
+  color: rgba(21, 26, 24, 0.66);
+  font-size: clamp(15px, 1.1vw, 19px);
+  font-weight: 650;
+}
+
+.end-cta a {
+  margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+  .end-cta {
+    width: 100vw;
+    bottom: auto;
+  }
+
+  .end-cta-card {
+    width: calc(100% - 40px);
+    padding: 34px 22px;
+  }
+
+  .end-cta p {
+    font-size: clamp(32px, 10vw, 48px);
+  }
+
+  .route-one,
+  .route-two {
+    width: 86vw;
+  }
 }

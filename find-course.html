@@ -62,24 +62,35 @@
     <section id="findingSection" class="finding-section"><div class="finding-card"><div class="finding-spinner"></div><h2>추천 코스 찾는 중</h2><p>선택한 답변을 바탕으로<br />가장 어울리는 따릉이길을 고르고 있어요.</p></div></section>
 
     <section id="resultSection" class="result-section">
-      <div class="result-card">
-        <div class="result-layout">
-          <figure class="result-photo">
-            <img id="resultImage" src="" alt="" />
-            <figcaption id="resultNumber" class="result-number"></figcaption>
-          </figure>
-          <div class="result-content">
-            <p class="result-label">당신에게 어울리는 따릉이길은</p>
-            <h2 id="resultName"></h2>
-            <p id="resultDescription" class="result-description"></p>
-            <div id="resultTags" class="result-tags"></div>
-            <div class="result-meta">
-              <div class="meta-card"><span>소요시간</span><strong id="resultTime"></strong></div>
-              <div class="meta-card"><span>거리</span><strong id="resultDistance"></strong></div>
-            </div>
-            <div class="result-actions"><a id="courseLink" href="#" class="primary-button">코스 자세히 보기</a><button id="restartButton" class="secondary-button" type="button">다시 찾아보기</button></div>
-          </div>
+      <div class="result-stage">
+        <div class="result-map-strip" aria-hidden="true">
+          <span>SEOUL BIKE ROUTE</span>
+          <span>DDARUNGI TRAIL</span>
+          <span>RIDE NOTE</span>
         </div>
+
+        <div class="result-visual-card">
+          <img id="resultImage" src="" alt="" />
+          <div class="result-number-badge" id="resultNumber"></div>
+        </div>
+
+        <article class="result-note-card">
+          <p class="result-label">오늘의 따릉이길 추천</p>
+          <h2 id="resultName"></h2>
+          <p id="resultDescription" class="result-description"></p>
+
+          <div class="result-route-summary">
+            <div class="meta-card"><span>소요시간</span><strong id="resultTime"></strong></div>
+            <div class="meta-card"><span>거리</span><strong id="resultDistance"></strong></div>
+          </div>
+
+          <div id="resultTags" class="result-tags"></div>
+
+          <div class="result-actions">
+            <a id="courseLink" href="#" class="primary-button">코스 자세히 보기</a>
+            <button id="restartButton" class="secondary-button" type="button">다시 찾아보기</button>
+          </div>
+        </article>
       </div>
     </section>
   </main>
@@ -93,6 +104,6 @@
       </div>
     </div>
   </div>
-  <script src="./find-course.js?v=second-revision"></script>
+  <script src="./find-course.js?v=third-revision"></script>
 </body>
 </html>

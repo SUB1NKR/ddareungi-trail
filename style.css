@@ -17,3 +17,93 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
 .external-notice{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(9,20,15,.34);backdrop-filter:blur(12px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 260ms ease,visibility 0s linear 260ms}.external-notice.is-visible{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 260ms ease,visibility 0s}.external-notice-card{position:relative;width:min(430px,100%);padding:34px 30px 28px;border-radius:30px;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(246,255,250,.94));border:1px solid rgba(255,255,255,.72);box-shadow:0 30px 90px rgba(0,0,0,.18),inset 0 0 0 1px rgba(48,226,145,.12);text-align:left}.external-notice-card::before{content:"";position:absolute;left:30px;top:0;width:74px;height:5px;border-radius:999px;background:var(--main-color)}.external-notice-close{position:absolute;right:18px;top:16px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(30,30,30,.06);color:rgba(30,30,30,.78);font-size:28px;line-height:1}.external-notice-close:hover{background:rgba(48,226,145,.18);color:var(--main-color-dark)}.external-notice-eyebrow{margin:0 0 12px;color:var(--main-color-dark);font-size:13px;font-weight:900;letter-spacing:.08em}.external-notice-card h2{margin:0;color:var(--black);font-size:25px;line-height:1.24;font-weight:900}.external-notice-description{margin:14px 0 0;color:rgba(30,30,30,.62);font-size:15px;font-weight:600}.external-notice-actions{display:flex;gap:10px;margin-top:26px}.notice-secondary,.notice-primary{height:48px;padding:0 20px;border-radius:999px;border:0;font-size:15px;font-weight:850}.notice-secondary{flex:1;background:#fff;color:var(--black);border:1px solid rgba(30,30,30,.12)}.notice-primary{flex:1.2;background:var(--main-color);color:#fff;box-shadow:0 14px 34px rgba(48,226,145,.32)}
 
 @media(max-width:768px){:root{--gnb-height:76px}.site-gnb{padding:0 20px}.gnb-logo{width:160px;height:36px}.gnb-menu-button{width:40px;height:40px}.gnb-menu-button span{width:27px;height:3px}.gnb-menu-button.is-open span:nth-child(1){transform:translateY(9px) rotate(45deg)}.gnb-menu-button.is-open span:nth-child(3){transform:translateY(-9px) rotate(-45deg)}.menu-content{left:32px}.menu-nav{gap:36px}.menu-link{font-size:48px}.menu-icon-list{margin-top:72px}.menu-copyright{right:24px;bottom:28px;font-size:11px}.scroll-guide-card{min-width:240px;padding:18px 22px}.end-cta{width:calc(100% - 48px);bottom:72px}.end-cta a{width:100%}.external-notice-actions{flex-direction:column}.notice-secondary,.notice-primary{width:100%;flex:auto}}
+
+/* =========================
+   Smooth Custom Cursor
+========================= */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+
+  a,
+  button,
+  [role="button"],
+  .gnb-menu-button,
+  .menu-link,
+  .menu-sns-link,
+  .popup-button,
+  .primary-button,
+  .secondary-button,
+  .answer-button,
+  .result-button,
+  .course-card,
+  .external-notice-close,
+  .notice-secondary,
+  .notice-primary {
+    cursor: none;
+  }
+
+  .custom-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 20000;
+    width: 38px;
+    height: 38px;
+    border: 1.5px solid rgba(48, 226, 145, 0.95);
+    border-radius: 999px;
+    background: rgba(48, 226, 145, 0.04);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+    transition:
+      width 220ms ease,
+      height 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease,
+      opacity 160ms ease;
+    will-change: transform;
+  }
+
+  .custom-cursor__dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #30E291;
+    transform: translate(-50%, -50%);
+    transition: width 220ms ease, height 220ms ease, background-color 220ms ease;
+  }
+
+  .custom-cursor.is-visible {
+    opacity: 1;
+  }
+
+  .custom-cursor.is-hover {
+    width: 66px;
+    height: 66px;
+    background: rgba(48, 226, 145, 0.14);
+    border-color: rgba(48, 226, 145, 1);
+  }
+
+  .custom-cursor.is-hover .custom-cursor__dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-cursor.is-pressed {
+    width: 30px;
+    height: 30px;
+    background: rgba(48, 226, 145, 0.22);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .custom-cursor {
+    display: none;
+  }
+}
+

@@ -413,3 +413,38 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* 4차 수정사항: 코스 결과 화면 백그라운드 그라디언트 이동 효과 */
+.result-section {
+  background:
+    radial-gradient(circle at var(--result-grad-x, 18%) var(--result-grad-y, 22%), rgba(48, 226, 145, 0.24), transparent 28%),
+    radial-gradient(circle at calc(100% - var(--result-grad-x, 18%)) 78%, rgba(48, 226, 145, 0.13), transparent 30%),
+    linear-gradient(135deg, #f7fff9 0%, #ffffff 48%, #ecfff6 100%);
+  background-size: 130% 130%, 140% 140%, 100% 100%;
+  animation: resultGradientDrift 9s ease-in-out infinite alternate;
+}
+
+.result-section.is-visible {
+  animation-play-state: running;
+}
+
+@keyframes resultGradientDrift {
+  0% {
+    --result-grad-x: 14%;
+    --result-grad-y: 18%;
+    background-position: 0% 0%, 100% 100%, center;
+  }
+
+  50% {
+    --result-grad-x: 52%;
+    --result-grad-y: 28%;
+    background-position: 48% 36%, 52% 42%, center;
+  }
+
+  100% {
+    --result-grad-x: 82%;
+    --result-grad-y: 16%;
+    background-position: 100% 70%, 0% 20%, center;
+  }
+}

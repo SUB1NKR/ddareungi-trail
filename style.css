@@ -876,3 +876,86 @@ body {
     width: 86vw;
   }
 }
+
+
+/* 4차 수정사항: 마지막 CTA 중앙 정렬 보정 + 배경 요소 인터랙션 */
+.end-cta {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  transform: translateY(24px);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.end-cta.is-visible {
+  transform: translateY(0);
+}
+
+.end-cta-card {
+  position: relative;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.end-cta-scene {
+  --cta-parallax-x: 0px;
+  --cta-parallax-y: 0px;
+}
+
+.end-cta-orbit,
+.end-cta-route {
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 420ms ease;
+  will-change: transform;
+}
+
+.end-cta.is-visible .orbit-one {
+  animation: ctaOrbitFloatOne 7.5s ease-in-out infinite;
+  transform: translate(calc(var(--cta-parallax-x) * -0.45), calc(var(--cta-parallax-y) * -0.35));
+}
+
+.end-cta.is-visible .orbit-two {
+  animation: ctaOrbitFloatTwo 8.5s ease-in-out infinite;
+  transform: translate(calc(var(--cta-parallax-x) * 0.55), calc(var(--cta-parallax-y) * 0.45));
+}
+
+.end-cta.is-visible .route-one {
+  animation: ctaRoutePulse 3.8s ease-in-out infinite;
+  transform: translate(calc(var(--cta-parallax-x) * 0.32), calc(var(--cta-parallax-y) * -0.25)) rotate(-12deg);
+}
+
+.end-cta.is-visible .route-two {
+  animation: ctaRoutePulse 4.4s ease-in-out infinite reverse;
+  transform: translate(calc(var(--cta-parallax-x) * -0.28), calc(var(--cta-parallax-y) * 0.3)) rotate(9deg);
+}
+
+@keyframes ctaOrbitFloatOne {
+  0%, 100% { box-shadow: inset 0 0 0 14px rgba(48, 226, 145, 0.04), 0 0 0 rgba(48, 226, 145, 0); }
+  50% { box-shadow: inset 0 0 0 22px rgba(48, 226, 145, 0.07), 0 18px 70px rgba(48, 226, 145, 0.12); }
+}
+
+@keyframes ctaOrbitFloatTwo {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+
+@keyframes ctaRoutePulse {
+  0%, 100% { opacity: 0.48; background-size: 100% 100%; }
+  50% { opacity: 1; background-size: 140% 100%; }
+}
+
+@media (max-width: 768px) {
+  .end-cta {
+    left: 0;
+    right: 0;
+    transform: translateY(24px);
+  }
+
+  .end-cta.is-visible {
+    transform: translateY(0);
+  }
+}

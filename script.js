@@ -15,6 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const externalCancelButton = document.querySelector('#externalCancelButton');
   const externalMoveButton = document.querySelector('#externalMoveButton');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
+  const endCtaScene = document.querySelector('.end-cta-scene');
 
   const slideInterval = 2000;
   const totalLoadingTime = Math.max(slides.length, 1) * slideInterval;
@@ -220,6 +221,25 @@ window.addEventListener('DOMContentLoaded', () => {
   function toggleMenu() { if (isMenuOpen) closeMenu(); else openMenu(); }
   function moveToHome(event) { event.preventDefault(); if (isMenuOpen) { closeMenu(() => { window.location.href = './index.html?skipLoading=1'; }); return; } window.location.href = './index.html?skipLoading=1'; }
 
+  function updateEndCtaBackgroundInteraction(event) {
+    if (!endCta || !endCtaScene || !endCta.classList.contains('is-visible')) return;
+
+    const rect = endCta.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const offsetX = clamp((event.clientX - centerX) / rect.width, -0.5, 0.5) * 42;
+    const offsetY = clamp((event.clientY - centerY) / rect.height, -0.5, 0.5) * 42;
+
+    endCtaScene.style.setProperty('--cta-parallax-x', `${offsetX}px`);
+    endCtaScene.style.setProperty('--cta-parallax-y', `${offsetY}px`);
+  }
+
+  function resetEndCtaBackgroundInteraction() {
+    if (!endCtaScene) return;
+    endCtaScene.style.setProperty('--cta-parallax-x', '0px');
+    endCtaScene.style.setProperty('--cta-parallax-y', '0px');
+  }
+
   function initPage() {
     saveLockedScrollPosition();
     startScrollProtection();
@@ -238,5 +258,8 @@ window.addEventListener('DOMContentLoaded', () => {
   externalMoveButton?.addEventListener('click', moveToPendingExternalUrl);
   courseIndexExternalLink?.addEventListener('click', (event) => { event.preventDefault(); if (isMenuOpen) { closeMenu(() => showExternalNoticeAndMove(courseIndexUrl)); return; } showExternalNoticeAndMove(courseIndexUrl); });
   startButton?.addEventListener('click', startLoading);
+  endCta?.addEventListener('mousemove', updateEndCtaBackgroundInteraction);
+  endCta?.addEventListener('mouseleave', resetEndCtaBackgroundInteraction);
+
   initPage();
 });

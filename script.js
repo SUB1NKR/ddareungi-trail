@@ -1,562 +1,410 @@
-const adaptivePopup = document.querySelector("#adaptivePopup");
-const startButton = document.querySelector("#startButton");
+(() => {
+  const entryPopup = document.getElementById("entryPopup");
+  const startButton = document.getElementById("startButton");
+  const loadingPage = document.getElementById("loadingPage");
+  const loadingSlides = Array.from(document.querySelectorAll(".loading-slide"));
+  const loadingFill = document.getElementById("loadingFill");
 
-const loadingPage = document.querySelector("#loading");
-const slides = document.querySelectorAll(".safety-slide");
-const loadingFill = document.querySelector("#loadingFill");
+  const gnb = document.getElementById("gnb");
+  const menuButton = document.getElementById("menuButton");
+  const menuPanel = document.getElementById("menuPanel");
 
-const gnb = document.querySelector("#gnb");
-const menuButton = document.querySelector("#menuButton");
-const menuPanel = document.querySelector("#menuPanel");
+  const courseIndexButton = document.getElementById("courseIndexButton");
+  const externalNotice = document.getElementById("externalNotice");
+  const externalNoticeClose = document.getElementById("externalNoticeClose");
 
-const introVideo = document.querySelector("#introVideo");
-const scrollGuide = document.querySelector("#scrollGuide");
-const frameImage = document.querySelector("#frameImage");
-const endCta = document.querySelector("#endCta");
+  const mainVideo = document.getElementById("mainVideo");
+  const scrollGuide = document.getElementById("scrollGuide");
+  const endCta = document.getElementById("endCta");
 
-const externalNotice = document.querySelector("#externalNotice");
-const courseIndexExternalLink = document.querySelector("#courseIndexExternalLink");
+  const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
-const slideInterval = 2000;
-const totalLoadingTime = slides.length * slideInterval;
-const menuDuration = 780;
+  const loadingDuration = 6000;
+  const slideInterval = 2000;
 
-const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
+  const autoPlaySeconds = 2;
+  const scrollLengthMultiplier = 7;
+  const lerpAmount = 0.08;
+  const scrollGuideDelay = 5000;
 
-/*
-  프레임 이미지 설정
-  BX사이트0000.webp ~ BX사이트0361.webp = 362장
-*/
-const frameCount = 3038;
-const frameStartIndex = 0000;
-const framePath = "./assets/frames/";
-const framePrefix = "BX사이트";
-const frameExtension = ".webp";
+  let isMenuOpen = false;
+  let isPageReady = false;
+  let isAutoPlaying = false;
+  let isScrollControlReady = false;
 
-/*
-  영상 종료 후 스크롤 프레임 시작 위치
-  영상 마지막 장면이 BX사이트0000.webp 근처와 이어진다는 전제
-*/
-const scrollStartFrame = 0;
+  let videoDuration = 0;
+  let scrollStartTime = autoPlaySeconds;
+  let scrollEndTime = 0;
 
-const scrollSpeedMultiplier = 2;
-const baseScrollScreens = 8;
+  let targetProgress = 0;
+  let currentProgress = 0;
 
-let currentSlideIndex = 0;
-let slideTimer = null;
-let scrollGuideTimer = null;
+  let animationFrameId = null;
+  let scrollGuideTimer = null;
+  let externalMoveTimer = null;
 
-let isPageReady = false;
-let isVideoPlaying = false;
-let isMenuOpen = false;
-let isMenuClosing = false;
+  let lockedScrollY = 0;
+  let previousScrollY = 0;
 
-let currentFrameIndex = -1;
-let lastScrollY = 0;
-let lockedScrollY = 0;
-let isRestoringScroll = false;
-let allowProgrammaticScroll = false;
-
-function easeInOutCubic(t) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function getFrameSrc(index) {
-  const frameNumber = String(frameStartIndex + index).padStart(4, "0");
-  return `${framePath}${framePrefix}${frameNumber}${frameExtension}`;
-}
-
-function getMaxScroll() {
-  return window.innerHeight * baseScrollScreens * scrollSpeedMultiplier;
-}
-
-function getScrollProgress() {
-  const maxScroll = getMaxScroll();
-
-  if (maxScroll <= 0) return 0;
-
-  return clamp(window.scrollY / maxScroll, 0, 1);
-}
-
-function preloadFrames() {
-  for (let index = scrollStartFrame; index < frameCount; index += 1) {
-    const image = new Image();
-    image.src = getFrameSrc(index);
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
   }
-}
 
-function setFrame(index) {
-  if (!frameImage) return;
+  function hasSkipLoading() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("skipLoading") === "1";
+  }
 
-  const safeIndex = clamp(index, 0, frameCount - 1);
+  function lockBodyScroll() {
+    lockedScrollY = window.scrollY || window.pageYOffset;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    document.body.classList.add("is-locked");
+  }
 
-  if (safeIndex === currentFrameIndex) return;
+  function unlockBodyScroll() {
+    const restoreY = Math.abs(parseInt(document.body.style.top || "0", 10));
 
-  currentFrameIndex = safeIndex;
-  frameImage.src = getFrameSrc(currentFrameIndex);
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+    document.body.classList.remove("is-locked");
 
-  updateEndCta();
-}
+    window.scrollTo(0, restoreY || lockedScrollY || 0);
+  }
 
-function updateFrameByScroll() {
-  if (!isPageReady || isVideoPlaying || isMenuOpen || isMenuClosing) return;
+  function setPageScrollHeight() {
+    const scrollHeight = window.innerHeight * scrollLengthMultiplier + window.innerHeight;
+    document.body.style.minHeight = `${scrollHeight}px`;
+  }
 
-  const progress = getScrollProgress();
-  const frameRange = frameCount - 1 - scrollStartFrame;
-  const frameIndex = scrollStartFrame + Math.round(progress * frameRange);
+  function getMaxScroll() {
+    return Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  }
 
-  setFrame(frameIndex);
-}
+  function updateTargetProgress() {
+    if (!isScrollControlReady || isMenuOpen) return;
 
-function updateEndCta() {
-  if (!endCta) return;
+    const nextProgress = window.scrollY / getMaxScroll();
+    targetProgress = clamp(nextProgress, 0, 1);
 
-  if (currentFrameIndex >= frameCount - 1) {
-    endCta.classList.add("is-visible");
-    endCta.setAttribute("aria-hidden", "false");
+    updateGnbByScrollDirection();
     hideScrollGuide();
-    return;
+    restartScrollGuideTimer();
   }
 
-  endCta.classList.remove("is-visible");
-  endCta.setAttribute("aria-hidden", "true");
-}
+  function updateVideoByScroll() {
+    if (!isScrollControlReady || !videoDuration) return;
 
-function showGnb() {
-  if (!gnb) return;
+    currentProgress += (targetProgress - currentProgress) * lerpAmount;
 
-  gnb.classList.remove("is-hidden");
+    if (Math.abs(targetProgress - currentProgress) < 0.0004) {
+      currentProgress = targetProgress;
+    }
 
-  requestAnimationFrame(() => {
+    const controllableDuration = Math.max(0.01, scrollEndTime - scrollStartTime);
+    const nextTime = scrollStartTime + currentProgress * controllableDuration;
+
+    if (Number.isFinite(nextTime) && Math.abs(mainVideo.currentTime - nextTime) > 0.015) {
+      mainVideo.currentTime = nextTime;
+    }
+
+    updateEndCta();
+  }
+
+  function animationLoop() {
+    updateVideoByScroll();
+    animationFrameId = window.requestAnimationFrame(animationLoop);
+  }
+
+  function startAnimationLoop() {
+    if (animationFrameId) return;
+    animationFrameId = window.requestAnimationFrame(animationLoop);
+  }
+
+  function showGnb() {
     gnb.classList.add("is-visible");
-  });
-}
-
-function hideGnb() {
-  if (!gnb || isMenuOpen || isMenuClosing) return;
-
-  gnb.classList.remove("is-visible");
-  gnb.classList.add("is-hidden");
-}
-
-function updateGnbByScrollDirection() {
-  if (!gnb || !isPageReady || isVideoPlaying || isMenuOpen || isMenuClosing) return;
-
-  const currentScrollY = window.scrollY;
-
-  if (Math.abs(currentScrollY - lastScrollY) < 4) return;
-
-  if (currentScrollY <= 10) {
-    showGnb();
-  } else if (currentScrollY > lastScrollY) {
-    hideGnb();
-  } else {
-    showGnb();
   }
 
-  lastScrollY = currentScrollY;
-}
-
-function showScrollGuide() {
-  if (!scrollGuide || isMenuOpen || isMenuClosing || isVideoPlaying) return;
-  if (currentFrameIndex >= frameCount - 1) return;
-
-  scrollGuide.classList.add("is-visible");
-}
-
-function hideScrollGuide() {
-  if (!scrollGuide) return;
-
-  scrollGuide.classList.remove("is-visible");
-}
-
-function restartScrollGuideTimer() {
-  clearTimeout(scrollGuideTimer);
-
-  if (currentFrameIndex >= frameCount - 1) return;
-
-  scrollGuideTimer = setTimeout(showScrollGuide, 5000);
-}
-
-function updateScrollGuideByUserScroll() {
-  if (!isPageReady || isVideoPlaying || isMenuOpen || isMenuClosing) return;
-
-  hideScrollGuide();
-  restartScrollGuideTimer();
-}
-
-function shouldLockPageScroll() {
-  return !isPageReady || isMenuOpen || isMenuClosing || isVideoPlaying;
-}
-
-function saveLockedScrollPosition() {
-  lockedScrollY = window.scrollY;
-}
-
-function preventScrollInput(event) {
-  if (!shouldLockPageScroll()) return;
-
-  event.preventDefault();
-}
-
-function preventScrollKey(event) {
-  if (!shouldLockPageScroll()) return;
-
-  const scrollKeys = [
-    "ArrowUp",
-    "ArrowDown",
-    "PageUp",
-    "PageDown",
-    "Home",
-    "End",
-    " "
-  ];
-
-  if (scrollKeys.includes(event.key)) {
-    event.preventDefault();
-  }
-}
-
-function restoreLockedScroll() {
-  if (!shouldLockPageScroll()) return;
-  if (allowProgrammaticScroll) return;
-  if (isRestoringScroll) return;
-  if (window.scrollY === lockedScrollY) return;
-
-  isRestoringScroll = true;
-
-  window.scrollTo(0, lockedScrollY);
-
-  requestAnimationFrame(() => {
-    isRestoringScroll = false;
-  });
-}
-
-function handlePageScroll() {
-  if (shouldLockPageScroll()) {
-    restoreLockedScroll();
-    return;
+  function hideGnb() {
+    gnb.classList.remove("is-visible");
   }
 
-  updateFrameByScroll();
-  updateGnbByScrollDirection();
-  updateScrollGuideByUserScroll();
-}
+  function updateGnbByScrollDirection() {
+    if (!isPageReady || isMenuOpen) return;
 
-function startScrollProtection() {
-  window.addEventListener("wheel", preventScrollInput, { passive: false });
-  window.addEventListener("touchmove", preventScrollInput, { passive: false });
-  window.addEventListener("keydown", preventScrollKey);
-  window.addEventListener("scroll", handlePageScroll);
-}
+    const currentY = window.scrollY || window.pageYOffset;
 
-function setScrollWithoutLock(y) {
-  allowProgrammaticScroll = true;
+    if (currentY > previousScrollY && currentY > 120) {
+      gnb.classList.add("is-hidden-by-scroll");
+    } else {
+      gnb.classList.remove("is-hidden-by-scroll");
+    }
 
-  window.scrollTo(0, y);
-
-  requestAnimationFrame(() => {
-    allowProgrammaticScroll = false;
-  });
-}
-
-function showExternalNoticeAndMove(url) {
-  if (!externalNotice) {
-    window.location.href = url;
-    return;
+    previousScrollY = currentY;
   }
 
-  externalNotice.classList.add("is-visible");
-
-  setTimeout(() => {
-    window.location.href = url;
-  }, 1200);
-}
-
-/* =========================
-   영상 → 프레임 시퀀스
-========================= */
-
-function startIntroVideo() {
-  isVideoPlaying = true;
-  isPageReady = false;
-
-  saveLockedScrollPosition();
-  hideGnb();
-  hideScrollGuide();
-
-  if (frameImage) {
-    frameImage.classList.remove("is-visible");
-    frameImage.style.opacity = "0";
+  function showScrollGuide() {
+    if (!isScrollControlReady || targetProgress > 0.94) return;
+    scrollGuide.classList.add("is-visible");
   }
 
-  if (!introVideo) {
-    finishIntroVideo();
-    return;
+  function hideScrollGuide() {
+    scrollGuide.classList.remove("is-visible");
   }
 
-  introVideo.pause();
-  introVideo.currentTime = 0;
+  function restartScrollGuideTimer() {
+    window.clearTimeout(scrollGuideTimer);
 
-  introVideo.classList.add("is-visible");
-  introVideo.style.display = "block";
-  introVideo.style.opacity = "1";
+    if (!isScrollControlReady || targetProgress > 0.94) return;
 
-  introVideo.removeEventListener("ended", finishIntroVideo);
-  introVideo.addEventListener("ended", finishIntroVideo, {
-    once: true
-  });
+    scrollGuideTimer = window.setTimeout(() => {
+      showScrollGuide();
+    }, scrollGuideDelay);
+  }
 
-  setTimeout(() => {
-    const playPromise = introVideo.play();
+  function updateEndCta() {
+    if (currentProgress >= 0.985) {
+      endCta.classList.add("is-visible");
+      hideScrollGuide();
+    } else {
+      endCta.classList.remove("is-visible");
+    }
+  }
 
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => {
-        finishIntroVideo();
+  function startLoading() {
+    entryPopup.classList.add("is-hidden");
+
+    window.setTimeout(() => {
+      entryPopup.style.display = "none";
+      loadingPage.classList.add("is-visible");
+      loadingPage.setAttribute("aria-hidden", "false");
+
+      runLoadingSlides();
+      runLoadingBar();
+
+      window.setTimeout(() => {
+        finishLoading();
+      }, loadingDuration);
+    }, 420);
+  }
+
+  function runLoadingSlides() {
+    loadingSlides.forEach((slide, index) => {
+      slide.classList.toggle("is-active", index === 0);
+    });
+
+    let currentIndex = 0;
+
+    const slideTimer = window.setInterval(() => {
+      currentIndex += 1;
+
+      loadingSlides.forEach((slide, index) => {
+        slide.classList.toggle("is-active", index === currentIndex);
       });
-    }
-  }, 1000);
-}
 
-function finishIntroVideo() {
-  if (introVideo) {
-    introVideo.pause();
-    introVideo.classList.remove("is-visible");
-    introVideo.style.opacity = "0";
-    introVideo.style.display = "none";
+      if (currentIndex >= loadingSlides.length - 1) {
+        window.clearInterval(slideTimer);
+      }
+    }, slideInterval);
   }
 
-  if (frameImage) {
-    frameImage.src = "./assets/frames/BX사이트0000.webp";
-    frameImage.classList.add("is-visible");
-    frameImage.style.opacity = "1";
-    frameImage.style.display = "block";
+  function runLoadingBar() {
+    loadingFill.style.transition = "none";
+    loadingFill.style.width = "0%";
+
+    window.requestAnimationFrame(() => {
+      loadingFill.style.transition = `width ${loadingDuration}ms linear`;
+      loadingFill.style.width = "100%";
+    });
   }
 
-  preloadFrames();
+  function finishLoading() {
+    loadingPage.classList.add("is-hidden");
 
-  setScrollWithoutLock(0);
+    window.setTimeout(() => {
+      loadingPage.style.display = "none";
+      loadingPage.setAttribute("aria-hidden", "true");
+      startMainExperience();
+    }, 520);
+  }
 
-  currentFrameIndex = -1;
-  setFrame(0);
+  function prepareVideoMetadata() {
+    return new Promise((resolve) => {
+      if (mainVideo.readyState >= 1 && Number.isFinite(mainVideo.duration)) {
+        resolve();
+        return;
+      }
 
-  lockedScrollY = 0;
-  lastScrollY = 0;
+      mainVideo.addEventListener("loadedmetadata", resolve, { once: true });
+      mainVideo.load();
+    });
+  }
 
-  isVideoPlaying = false;
-  isPageReady = true;
+  async function startMainExperience() {
+    lockBodyScroll();
 
-  showGnb();
-  showScrollGuide();
-  restartScrollGuideTimer();
-}
+    await prepareVideoMetadata();
 
-/* =========================
-   로딩
-========================= */
+    videoDuration = mainVideo.duration || 0;
+    scrollStartTime = Math.min(autoPlaySeconds, Math.max(0, videoDuration - 0.1));
+    scrollEndTime = videoDuration;
 
-function startLoading() {
-  saveLockedScrollPosition();
+    setPageScrollHeight();
 
-  adaptivePopup.classList.add("is-hidden");
+    mainVideo.classList.add("is-visible");
+    mainVideo.currentTime = 0;
+    mainVideo.muted = true;
+    mainVideo.playsInline = true;
 
-  setTimeout(() => {
-    adaptivePopup.style.display = "none";
-    loadingPage.classList.add("is-running");
+    isAutoPlaying = true;
+    hideGnb();
+    hideScrollGuide();
 
-    runLoadingProgress();
-    runSafetySlides();
-  }, 600);
-}
-
-function runLoadingProgress() {
-  const startTime = performance.now();
-
-  function updateProgress(currentTime) {
-    const elapsed = currentTime - startTime;
-    const rawProgress = Math.min(elapsed / totalLoadingTime, 1);
-    const easedProgress = easeInOutCubic(rawProgress);
-
-    loadingFill.style.width = `${easedProgress * 100}%`;
-
-    if (rawProgress < 1) {
-      requestAnimationFrame(updateProgress);
-      return;
+    try {
+      await mainVideo.play();
+    } catch (error) {
+      mainVideo.currentTime = 0;
     }
 
-    loadingFill.style.width = "100%";
-    finishLoading();
+    watchAutoPlayEnd();
   }
 
-  requestAnimationFrame(updateProgress);
-}
+  function watchAutoPlayEnd() {
+    const check = () => {
+      if (!isAutoPlaying) return;
 
-function runSafetySlides() {
-  slideTimer = setInterval(() => {
-    if (currentSlideIndex >= slides.length - 1) {
-      clearInterval(slideTimer);
-      return;
+      if (mainVideo.currentTime >= scrollStartTime || mainVideo.ended) {
+        finishAutoPlay();
+        return;
+      }
+
+      window.requestAnimationFrame(check);
+    };
+
+    window.requestAnimationFrame(check);
+  }
+
+  function finishAutoPlay() {
+    isAutoPlaying = false;
+
+    mainVideo.pause();
+    mainVideo.currentTime = scrollStartTime;
+
+    window.scrollTo(0, 0);
+    targetProgress = 0;
+    currentProgress = 0;
+
+    isPageReady = true;
+    isScrollControlReady = true;
+
+    unlockBodyScroll();
+    showGnb();
+    showScrollGuide();
+    restartScrollGuideTimer();
+    startAnimationLoop();
+  }
+
+  function openMenu() {
+    if (isMenuOpen) return;
+
+    isMenuOpen = true;
+    menuPanel.classList.add("is-open");
+    menuPanel.setAttribute("aria-hidden", "false");
+    menuButton.classList.add("is-active");
+    menuButton.setAttribute("aria-label", "메뉴 닫기");
+    gnb.classList.add("is-visible");
+    gnb.classList.remove("is-hidden-by-scroll");
+
+    lockBodyScroll();
+  }
+
+  function closeMenu() {
+    if (!isMenuOpen) return;
+
+    isMenuOpen = false;
+    menuPanel.classList.remove("is-open");
+    menuPanel.setAttribute("aria-hidden", "true");
+    menuButton.classList.remove("is-active");
+    menuButton.setAttribute("aria-label", "메뉴 열기");
+
+    unlockBodyScroll();
+  }
+
+  function toggleMenu() {
+    if (isMenuOpen) {
+      closeMenu();
+    } else {
+      openMenu();
     }
-
-    slides[currentSlideIndex].classList.remove("active");
-    currentSlideIndex += 1;
-    slides[currentSlideIndex].classList.add("active");
-  }, slideInterval);
-}
-
-function finishLoading() {
-  loadingPage.classList.add("is-hidden");
-
-  setTimeout(() => {
-    loadingPage.style.display = "none";
-
-    startIntroVideo();
-  }, 800);
-}
-
-function skipLoadingAndStart() {
-  adaptivePopup?.classList.add("is-hidden");
-  loadingPage?.classList.add("is-hidden");
-
-  if (adaptivePopup) adaptivePopup.style.display = "none";
-  if (loadingPage) loadingPage.style.display = "none";
-
-  startIntroVideo();
-}
-
-/* =========================
-   메뉴
-========================= */
-
-function openMenu() {
-  if (!menuButton || !menuPanel || isMenuClosing) return;
-
-  isMenuOpen = true;
-  isMenuClosing = false;
-
-  saveLockedScrollPosition();
-
-  document.body.classList.add("is-menu-open");
-  document.body.classList.remove("is-menu-closing");
-
-  menuPanel.classList.remove("is-closing");
-  menuPanel.classList.add("is-open");
-
-  menuButton.classList.add("is-open");
-  menuButton.setAttribute("aria-label", "메뉴 닫기");
-
-  showGnb();
-  hideScrollGuide();
-}
-
-function closeMenu(callback) {
-  if (!menuButton || !menuPanel || !isMenuOpen || isMenuClosing) return;
-
-  isMenuOpen = false;
-  isMenuClosing = true;
-
-  document.body.classList.remove("is-menu-open");
-  document.body.classList.add("is-menu-closing");
-
-  menuPanel.classList.remove("is-open");
-  menuPanel.classList.add("is-closing");
-
-  setTimeout(() => {
-    finishCloseMenu(callback);
-  }, menuDuration);
-}
-
-function finishCloseMenu(callback) {
-  isMenuClosing = false;
-
-  menuPanel.classList.remove("is-closing");
-
-  menuButton.classList.remove("is-open");
-  menuButton.setAttribute("aria-label", "메뉴 열기");
-
-  document.body.classList.remove("is-menu-closing");
-
-  setScrollWithoutLock(lockedScrollY);
-  lastScrollY = lockedScrollY;
-
-  showGnb();
-
-  if (typeof callback === "function") {
-    callback();
   }
-}
 
-function toggleMenu() {
-  if (isMenuOpen) {
+  function showExternalNotice() {
     closeMenu();
-  } else {
-    openMenu();
+
+    externalNotice.classList.add("is-visible");
+    externalNotice.setAttribute("aria-hidden", "false");
+
+    window.clearTimeout(externalMoveTimer);
+
+    externalMoveTimer = window.setTimeout(() => {
+      window.location.href = courseIndexUrl;
+    }, 1200);
   }
-}
 
-function moveToHome(event) {
-  event.preventDefault();
+  function closeExternalNotice() {
+    window.clearTimeout(externalMoveTimer);
+    externalNotice.classList.remove("is-visible");
+    externalNotice.setAttribute("aria-hidden", "true");
+  }
 
-  if (isMenuOpen) {
-    closeMenu(() => {
-      window.location.href = "./index.html?skipLoading=1";
+  function initSkipLoadingMode() {
+    entryPopup.style.display = "none";
+    loadingPage.style.display = "none";
+    startMainExperience();
+  }
+
+  function bindEvents() {
+    startButton.addEventListener("click", startLoading);
+    menuButton.addEventListener("click", toggleMenu);
+    courseIndexButton.addEventListener("click", showExternalNotice);
+    externalNoticeClose.addEventListener("click", closeExternalNotice);
+
+    window.addEventListener("scroll", updateTargetProgress, { passive: true });
+
+    window.addEventListener("resize", () => {
+      setPageScrollHeight();
+      updateTargetProgress();
     });
 
-    return;
-  }
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        if (externalNotice.classList.contains("is-visible")) {
+          closeExternalNotice();
+        }
 
-  window.location.href = "./index.html?skipLoading=1";
-}
-
-/* =========================
-   초기 실행
-========================= */
-
-function initPage() {
-  document.body.style.minHeight = `${window.innerHeight * baseScrollScreens * scrollSpeedMultiplier + window.innerHeight}px`;
-
-  saveLockedScrollPosition();
-  startScrollProtection();
-
-  const params = new URLSearchParams(window.location.search);
-  const shouldSkipLoading = params.get("skipLoading") === "1";
-
-  setFrame(0);
-  frameImage?.classList.remove("is-visible");
-
-  if (shouldSkipLoading) {
-    window.history.replaceState({}, document.title, "./index.html");
-    skipLoadingAndStart();
-  }
-}
-
-menuButton?.addEventListener("click", toggleMenu);
-
-document.querySelector("[data-home-link]")?.addEventListener("click", moveToHome);
-
-courseIndexExternalLink?.addEventListener("click", (event) => {
-  event.preventDefault();
-
-  if (isMenuOpen) {
-    closeMenu(() => {
-      showExternalNoticeAndMove(courseIndexUrl);
+        if (isMenuOpen) {
+          closeMenu();
+        }
+      }
     });
-
-    return;
   }
 
-  showExternalNoticeAndMove(courseIndexUrl);
-});
+  function init() {
+    bindEvents();
+    hideGnb();
 
-startButton?.addEventListener("click", startLoading);
+    if (hasSkipLoading()) {
+      initSkipLoadingMode();
+    } else {
+      lockBodyScroll();
+    }
+  }
 
-window.addEventListener("resize", () => {
-  document.body.style.minHeight = `${window.innerHeight * baseScrollScreens * scrollSpeedMultiplier + window.innerHeight}px`;
-  updateFrameByScroll();
-});
-
-initPage();
+  init();
+})();

@@ -3,187 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>따릉이길</title>
 
-  <title>자전거로 만나는 서울, 따릉이길</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link
+    rel="stylesheet"
+    as="style"
+    crossorigin
+    href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT.css"
+  />
 
   <link rel="stylesheet" href="./style.css" />
 </head>
-
 <body>
-  <!-- 로딩화면 -->
-  <section id="loading" class="loading-page" aria-label="따릉이 트레일 로딩화면">
-    <div class="safety-slide active">
-      <img src="./assets/safety/safety-01.png" alt="따릉이 안전수칙 1" />
-    </div>
-
-    <div class="safety-slide">
-      <img src="./assets/safety/safety-02.png" alt="따릉이 안전수칙 2" />
-    </div>
-
-    <div class="safety-slide">
-      <img src="./assets/safety/safety-03.png" alt="따릉이 안전수칙 3" />
-    </div>
-
-    <p class="loading-text" aria-label="Loading">
-      <span style="--i: 0">L</span>
-      <span style="--i: 1">o</span>
-      <span style="--i: 2">a</span>
-      <span style="--i: 3">d</span>
-      <span style="--i: 4">i</span>
-      <span style="--i: 5">n</span>
-      <span style="--i: 6">g</span>
-      <span style="--i: 7">.</span>
-      <span style="--i: 8">.</span>
-      <span style="--i: 9">.</span>
-    </p>
-
-    <div class="loading-track" aria-hidden="true">
-      <div id="loadingFill" class="loading-fill"></div>
-    </div>
-  </section>
-
-  <!-- 안내 팝업 -->
-  <section id="adaptivePopup" class="adaptive-popup" aria-label="화면 최적화 안내">
-    <div class="popup-dim"></div>
-
-    <div class="popup-card" role="dialog" aria-modal="true">
-      <p class="popup-label">자전거로 만나는 서울, 따릉이길</p>
-
-      <h1>
+  <div class="entry-popup" id="entryPopup" aria-modal="true" role="dialog">
+    <div class="entry-popup__dim"></div>
+    <div class="entry-popup__card">
+      <p class="entry-popup__eyebrow">Viewing Guide</p>
+      <h1 class="entry-popup__title">
         원활한 감상을 위해<br />
         크롬 브라우저에서 실행해주세요.
       </h1>
-
-      <p class="popup-description">
+      <p class="entry-popup__desc">
         본 웹사이트는 크롬 브라우저와 데스크톱 환경에 맞춰 제작되었습니다.
         화면 크기와 브라우저에 따라 일부 인터랙션이 다르게 보일 수 있습니다.
       </p>
-
-      <button id="startButton" class="popup-button" type="button">
+      <button class="entry-popup__button" id="startButton" type="button">
         확인하고 입장하기
       </button>
     </div>
+  </div>
+
+  <section class="loading-page" id="loadingPage" aria-hidden="true">
+    <div class="loading-page__inner">
+      <div class="loading-page__visual">
+        <img class="loading-slide is-active" src="./assets/safety/safety-01.png" alt="따릉이 안전 안내 1" />
+        <img class="loading-slide" src="./assets/safety/safety-02.png" alt="따릉이 안전 안내 2" />
+        <img class="loading-slide" src="./assets/safety/safety-03.png" alt="따릉이 안전 안내 3" />
+      </div>
+
+      <div class="loading-page__bottom">
+        <p class="loading-page__text">Loading...</p>
+        <div class="loading-page__bar">
+          <span class="loading-page__fill" id="loadingFill"></span>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- 상단 GNB -->
-  <header id="gnb" class="site-gnb" aria-label="상단 메뉴">
-    <a href="./index.html?skipLoading=1" class="gnb-logo" aria-label="따릉이 트레일 홈">
-      <img src="./assets/icons/ddareungi-logo.png" alt="따릉이 트레일" />
+  <header class="gnb" id="gnb">
+    <a class="gnb__logo-link" href="./index.html?skipLoading=1" aria-label="따릉이길 홈">
+      <img class="gnb__logo" src="./assets/icons/ddareungi-logo.png" alt="따릉이길" />
     </a>
 
-    <button id="menuButton" class="gnb-menu-button" type="button" aria-label="메뉴 열기">
-      <span></span>
+    <button class="gnb__menu-button" id="menuButton" type="button" aria-label="메뉴 열기">
       <span></span>
       <span></span>
     </button>
   </header>
 
-  <!-- 메뉴 화면 -->
-  <section id="menuPanel" class="menu-panel" aria-label="전체 메뉴">
-    <div class="menu-content">
-      <nav class="menu-nav" aria-label="주요 메뉴">
-        <a href="./index.html?skipLoading=1" class="menu-link" data-home-link style="--i: 0">
-          <span>홈</span>
-        </a>
+  <nav class="menu-panel" id="menuPanel" aria-hidden="true">
+    <div class="menu-panel__inner">
+      <ul class="menu-panel__list">
+        <li><a class="menu-panel__link" href="./index.html?skipLoading=1">홈</a></li>
+        <li><button class="menu-panel__link menu-panel__link--button" id="courseIndexButton" type="button">20코스 안내</button></li>
+        <li><a class="menu-panel__link" href="./find-course.html">나만의 코스 찾기</a></li>
+      </ul>
 
-        <a href="#" id="courseIndexExternalLink" class="menu-link" style="--i: 1">
-          <span>20코스 안내</span>
+      <div class="menu-panel__sns">
+        <a href="https://www.facebook.com/seoulbike" target="_blank" rel="noopener noreferrer" aria-label="따릉이 페이스북">
+          <img src="./assets/icons/menu-icon-01.png" alt="" />
         </a>
-
-        <a href="./find-course.html" class="menu-link" style="--i: 2">
-          <span>나만의 코스 찾기</span>
+        <a href="https://www.instagram.com/seoulbike_/" target="_blank" rel="noopener noreferrer" aria-label="따릉이 인스타그램">
+          <img src="./assets/icons/menu-icon-02.png" alt="" />
         </a>
-      </nav>
-
-      <div class="menu-icon-list" aria-label="외부 링크">
-        <a
-          href="https://www.facebook.com/seoulbike"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="menu-sns-link"
-          style="--i: 3"
-        >
-          <img src="./assets/icons/menu-icon-01.png" alt="서울자전거 페이스북" />
+        <a href="https://blog.naver.com/2seoulbike" target="_blank" rel="noopener noreferrer" aria-label="따릉이 블로그">
+          <img src="./assets/icons/menu-icon-03.png" alt="" />
         </a>
-
-        <a
-          href="https://www.instagram.com/seoulbike_/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="menu-sns-link"
-          style="--i: 2"
-        >
-          <img src="./assets/icons/menu-icon-02.png" alt="서울자전거 인스타그램" />
-        </a>
-
-        <a
-          href="https://blog.naver.com/2seoulbike"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="menu-sns-link"
-          style="--i: 1"
-        >
-          <img src="./assets/icons/menu-icon-03.png" alt="서울자전거 블로그" />
-        </a>
-
-        <a
-          href="https://www.youtube.com/@seoulbike_"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="menu-sns-link"
-          style="--i: 0"
-        >
-          <img src="./assets/icons/menu-icon-04.png" alt="서울자전거 유튜브" />
+        <a href="https://www.youtube.com/@seoulbike_" target="_blank" rel="noopener noreferrer" aria-label="따릉이 유튜브">
+          <img src="./assets/icons/menu-icon-04.png" alt="" />
         </a>
       </div>
     </div>
+  </nav>
 
-    <p class="menu-copyright">
-      COPYRIGHT ⓒ 2026 1_je0.in_ All RIGHTS RESERVED.
-    </p>
-  </section>
+  <div class="external-notice" id="externalNotice" aria-hidden="true">
+    <div class="external-notice__dim"></div>
+    <div class="external-notice__card" role="dialog" aria-modal="true">
+      <button class="external-notice__close" id="externalNoticeClose" type="button" aria-label="외부 이동 취소">
+        ×
+      </button>
 
-  <!-- 고정 메인화면 -->
-  <main id="main" class="main-page">
-    <video
-      id="introVideo"
-      class="intro-video"
-      src="./assets/video/intro.webm"
-      muted
-      playsinline
-      preload="auto"
-    ></video>
-
-    <img
-      id="frameImage"
-      class="frame-image"
-      src="./assets/frames/BX사이트0000.webp"
-      alt="따릉이 트레일 프레임 애니메이션"
-    />
-
-    <div id="scrollGuide" class="scroll-guide" aria-hidden="true">
-      <div class="scroll-guide-card">
-        <p class="scroll-guide-title">여행을 시작해볼까요?</p>
-        <p class="scroll-guide-subtitle">아래로 내려 따릉이길을 만나보세요</p>
-        <div class="scroll-guide-arrow"></div>
+      <div class="external-notice__icon">
+        <span></span>
       </div>
-    </div>
 
-    <div id="endCta" class="end-cta" aria-hidden="true">
-      <p>나와 맞는 코스를 찾아볼까?</p>
-      <a href="./find-course.html">코스 찾기 시작하기</a>
-    </div>
-  </main>
+      <p class="external-notice__eyebrow">External Link</p>
+      <h2 class="external-notice__title">외부 페이지로 이동합니다.</h2>
+      <p class="external-notice__desc">
+        서울시설공단 따릉이길 20코스 안내 페이지로 연결됩니다.
+      </p>
 
-  <!-- 실제 스크롤값을 만들기 위한 보이지 않는 영역 -->
-  <div id="scrollProxy" class="scroll-proxy" aria-hidden="true"></div>
-
-  <!-- 외부 이동 안내 -->
-  <div id="externalNotice" class="external-notice">
-    <div class="external-notice-card">
-      <p>외부 페이지로 이동합니다.</p>
+      <div class="external-notice__progress">
+        <span></span>
+      </div>
     </div>
   </div>
+
+  <main class="main-experience" id="mainExperience">
+    <section class="video-stage" id="videoStage">
+      <video
+        class="main-video"
+        id="mainVideo"
+        muted
+        playsinline
+        preload="auto"
+      >
+        <source src="./assets/video/main-sequence.webm" type="video/webm" />
+      </video>
+
+      <div class="scroll-guide" id="scrollGuide" aria-hidden="true">
+        <span>Scroll</span>
+        <i></i>
+      </div>
+
+      <div class="end-cta" id="endCta">
+        <p class="end-cta__eyebrow">Find Your Course</p>
+        <h2 class="end-cta__title">따릉이길을 직접 찾아볼까요?</h2>
+        <a class="end-cta__button" href="./find-course.html">나만의 코스 찾기</a>
+      </div>
+    </section>
+  </main>
 
   <script src="./script.js"></script>
 </body>

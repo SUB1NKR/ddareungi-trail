@@ -216,3 +216,66 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
     background: #156340;
   }
 }
+
+/* =========================
+   3차 수정사항 반영
+   - 커서 hover 색상 불투명 #156340
+   - 메뉴 화면 커서 #FFFFFF 유지
+   - 외부 이동 안내 표시 안정화
+========================= */
+.external-notice {
+  display: none;
+}
+
+.external-notice.is-visible {
+  display: flex;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor {
+    --cursor-line: #30E291;
+    --cursor-dot: #30E291;
+    --cursor-invert: #156340;
+    border-color: #30E291;
+  }
+
+  .custom-cursor .custom-cursor__dot {
+    background: #30E291;
+  }
+
+  body.is-menu-open .custom-cursor,
+  body.is-menu-closing .custom-cursor {
+    --cursor-line: #FFFFFF;
+    --cursor-dot: #FFFFFF;
+    border-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+    mix-blend-mode: normal;
+  }
+
+  body.is-menu-open .custom-cursor .custom-cursor__dot,
+  body.is-menu-closing .custom-cursor .custom-cursor__dot {
+    background: #FFFFFF;
+  }
+
+  .custom-cursor.is-hover {
+    border-color: #156340 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .custom-cursor.is-hover .custom-cursor__dot {
+    background: #156340 !important;
+  }
+
+  body.is-menu-open .custom-cursor.is-hover,
+  body.is-menu-closing .custom-cursor.is-hover {
+    border-color: #FFFFFF !important;
+  }
+
+  body.is-menu-open .custom-cursor.is-hover .custom-cursor__dot,
+  body.is-menu-closing .custom-cursor.is-hover .custom-cursor__dot {
+    background: #FFFFFF !important;
+  }
+}

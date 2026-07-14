@@ -40,8 +40,11 @@ let isRestoringScroll = false;
 let lastGuideUpdateTime = 0;
 let externalNoticeTimer = null;
 let targetVideoTime = introPlaySeconds;
+let targetScrollProgress = 0;
+let easedScrollProgress = 0;
 let videoScrubRaf = null;
-const videoScrubEase = 0.105;
+const videoScrubEase = 0.085;
+const videoSeekThreshold = 0.018;
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -79,20 +82,47 @@ function startVideoScrubEase() {
   if (videoScrubRaf || !mainVideo) return;
 
   const tick = () => {
-    if (!isPageReady || isVideoAutoPlaying || isMenuOpen || isMenuClosing || isModalOpen || !mainVideo) {
+    if (!mainVideo) {
       videoScrubRaf = null;
       return;
     }
 
-    const diff = targetVideoTime - mainVideo.currentTime;
+    if (!isPageReady || isVideoAutoPlaying || isMenuOpen || isMenuClosing || isModalOpen) {
+      videoScrubRaf = null;
+      return;
+    }
 
-    if (Math.abs(diff) <= 0.012) {
+    const scrubDuration = getScrubDuration();
+    if (scrubDuration <= 0) {
+      videoScrubRaf = null;
+      return;
+    }
+
+    const progressDiff = targetScrollProgress - easedScrollProgress;
+
+    if (Math.abs(progressDiff) <= 0.0008) {
+      easedScrollProgress = targetScrollProgress;
+      targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
+
+      if (Math.abs(mainVideo.currentTime - targetVideoTime) > videoSeekThreshold) {
+        mainVideo.currentTime = targetVideoTime;
+      }
+
+      updateEndCta(easedScrollProgress);
+      videoScrubRaf = null;
+      return;
+    }
+
+    // 사용자의 스크롤 위치를 곧바로 영상 시간에 꽂지 않고,
+    // 목표 지점까지 감속하듯 따라가게 만들어 툭툭 끊기는 느낌을 줄입니다.
+    easedScrollProgress = clamp(easedScrollProgress + progressDiff * videoScrubEase, 0, 1);
+    targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
+
+    if (Math.abs(mainVideo.currentTime - targetVideoTime) > videoSeekThreshold) {
       mainVideo.currentTime = targetVideoTime;
-      videoScrubRaf = null;
-      return;
     }
 
-    mainVideo.currentTime += diff * videoScrubEase;
+    updateEndCta(easedScrollProgress);
     videoScrubRaf = requestAnimationFrame(tick);
   };
 
@@ -105,18 +135,8 @@ function updateVideoByScroll() {
   const scrubDuration = getScrubDuration();
   if (scrubDuration <= 0) return;
 
-  const progress = getScrollProgress();
-  const easedProgress = easeOutCubic(progress);
-
-  targetVideoTime = introPlaySeconds + easedProgress * scrubDuration;
-
-  if (progress >= 0.995) {
-    mainVideo.currentTime = targetVideoTime;
-  } else {
-    startVideoScrubEase();
-  }
-
-  updateEndCta(progress);
+  targetScrollProgress = getScrollProgress();
+  startVideoScrubEase();
 }
 
 function updateEndCta(progress = getScrollProgress()) {
@@ -235,19 +255,31 @@ function setScrollWithoutLock(y) {
 }
 
 function openExternalNotice(url) {
+  if (!url) return;
+
   pendingExternalUrl = url;
   isModalOpen = true;
   saveLockedScrollPosition();
   clearTimeout(externalNoticeTimer);
   document.body.classList.add("is-modal-open");
-  externalNotice?.classList.add("is-visible");
-  externalNotice?.setAttribute("aria-hidden", "false");
+
+  if (!externalNotice) {
+    externalNoticeTimer = setTimeout(() => window.location.assign(url), 2000);
+    return;
+  }
+
+  externalNotice.style.display = "flex";
+  externalNotice.setAttribute("aria-hidden", "false");
+
+  requestAnimationFrame(() => {
+    externalNotice.classList.add("is-visible");
+  });
 
   externalNoticeTimer = setTimeout(() => {
     if (!pendingExternalUrl) return;
     const targetUrl = pendingExternalUrl;
     pendingExternalUrl = "";
-    window.location.href = targetUrl;
+    window.location.assign(targetUrl);
   }, 2000);
 }
 
@@ -258,6 +290,13 @@ function closeExternalNotice() {
   document.body.classList.remove("is-modal-open");
   externalNotice?.classList.remove("is-visible");
   externalNotice?.setAttribute("aria-hidden", "true");
+  if (externalNotice) {
+    setTimeout(() => {
+      if (!externalNotice.classList.contains("is-visible")) {
+        externalNotice.style.display = "none";
+      }
+    }, 280);
+  }
 }
 
 function confirmExternalMove() {
@@ -309,6 +348,8 @@ function finishIntroPlay() {
   if (Number.isFinite(mainVideo.duration) && mainVideo.duration > introPlaySeconds) {
     mainVideo.currentTime = introPlaySeconds;
     targetVideoTime = introPlaySeconds;
+    targetScrollProgress = 0;
+    easedScrollProgress = 0;
   }
   setScrollWithoutLock(0);
   lockedScrollY = 0;

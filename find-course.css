@@ -10,7 +10,9 @@
 @media(max-width:900px){:root{--gnb-height:76px}.site-gnb{padding:0 20px}.gnb-logo{width:160px;height:36px}.gnb-menu-button{width:40px;height:40px}.gnb-menu-button span{width:27px;height:3px}.gnb-menu-button.is-open span:nth-child(1){transform:translateY(9px) rotate(45deg)}.gnb-menu-button.is-open span:nth-child(3){transform:translateY(-9px) rotate(-45deg)}.menu-content{left:32px}.menu-nav{gap:36px}.menu-link{font-size:48px}.menu-icon-list{margin-top:72px}.menu-copyright{right:24px;bottom:28px;font-size:11px}.intro-section{padding:calc(var(--gnb-height) + 34px) 20px 42px}.hero-grid{display:none}.intro-panel{width:100%;padding:42px 24px;border-radius:28px}.intro-panel h1{font-size:40px}.intro-description{font-size:17px}.question-section{padding:calc(var(--gnb-height) + 44px) 20px 42px}.question-progress{left:20px;right:20px}.question-card{width:100%;padding:30px 22px;border-radius:28px}.question-card h2{font-size:40px}.answer-button{min-height:56px}.result-section{padding:calc(var(--gnb-height) + 36px) 20px 42px}.result-card{padding:18px;border-radius:32px}.result-content{min-height:auto;padding:34px 22px;border-radius:24px}.result-content h2{font-size:40px}.result-meta{grid-template-columns:1fr}.result-actions{flex-direction:column}.result-actions .primary-button,.result-actions .secondary-button,.primary-button,.secondary-button,.prev-button{width:100%}.external-notice-actions{flex-direction:column}.notice-secondary,.notice-primary{width:100%;flex:auto}}
 
 /* =========================
-   Smooth Custom Cursor - Dot & Line Only
+   Smooth Custom Cursor - Dot & Line Only / Element Invert
+   - 기본: 따릉이 그린 라인 + 따릉이 그린 점
+   - 상호작용 요소 hover: 면 없이 점과 라인만 유지, mix-blend-mode:difference로 대상 요소 색상과 시각적으로 반전
 ========================= */
 @media (hover: hover) and (pointer: fine) {
   body {
@@ -36,10 +38,9 @@
   }
 
   .custom-cursor {
-    --cursor-line: #00FF9D;
-    --cursor-dot: #1E1E1E;
-    --cursor-hover-line: #1E1E1E;
-    --cursor-hover-dot: #00FF9D;
+    --cursor-line: #30E291;
+    --cursor-dot: #30E291;
+    --cursor-invert: #FFFFFF;
 
     position: fixed;
     left: 0;
@@ -47,7 +48,7 @@
     z-index: 20000;
     width: 38px;
     height: 38px;
-    border: 1.8px solid var(--cursor-line);
+    border: 1.6px solid var(--cursor-line);
     border-radius: 999px;
     background: transparent;
     box-shadow: none;
@@ -57,9 +58,10 @@
     transition:
       width 220ms ease,
       height 220ms ease,
-      border-color 180ms ease,
+      border-color 160ms ease,
       opacity 160ms ease;
     will-change: transform;
+    mix-blend-mode: normal;
   }
 
   .custom-cursor__dot {
@@ -74,7 +76,7 @@
     transition:
       width 220ms ease,
       height 220ms ease,
-      background-color 180ms ease;
+      background-color 160ms ease;
   }
 
   .custom-cursor.is-visible {
@@ -82,17 +84,18 @@
   }
 
   .custom-cursor.is-hover {
-    width: 66px;
-    height: 66px;
-    border-color: var(--cursor-hover-line);
+    width: 62px;
+    height: 62px;
+    border-color: var(--cursor-invert);
     background: transparent;
     box-shadow: none;
+    mix-blend-mode: difference;
   }
 
   .custom-cursor.is-hover .custom-cursor__dot {
     width: 8px;
     height: 8px;
-    background: var(--cursor-hover-dot);
+    background: var(--cursor-invert);
   }
 
   .custom-cursor.is-pressed {
@@ -106,4 +109,3 @@
     display: none;
   }
 }
-

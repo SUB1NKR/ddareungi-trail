@@ -192,3 +192,78 @@ window.addEventListener("DOMContentLoaded", () => {
   initCustomCursor();
   externalNotice?.addEventListener("click", e=>{if(e.target===externalNotice)closeExternalNotice()});
 });
+
+/* =========================
+   Smooth Custom Cursor
+========================= */
+function initCustomCursor() {
+  const cursor = document.querySelector("#customCursor");
+  if (!cursor) return;
+
+  const canUseCustomCursor = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!canUseCustomCursor) return;
+
+  let targetX = window.innerWidth / 2;
+  let targetY = window.innerHeight / 2;
+  let currentX = targetX;
+  let currentY = targetY;
+  let isStarted = false;
+
+  const hoverTargets = [
+    "a",
+    "button",
+    "[role='button']",
+    ".gnb-menu-button",
+    ".menu-link",
+    ".menu-sns-link",
+    ".popup-button",
+    ".primary-button",
+    ".secondary-button",
+    ".answer-button",
+    ".result-button",
+    ".course-card",
+    ".external-notice-close",
+    ".notice-secondary",
+    ".notice-primary"
+  ].join(",");
+
+  function animateCursor() {
+    currentX += (targetX - currentX) * 0.17;
+    currentY += (targetY - currentY) * 0.17;
+    cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+    requestAnimationFrame(animateCursor);
+  }
+
+  function startCursor() {
+    cursor.classList.add("is-visible");
+    if (isStarted) return;
+    isStarted = true;
+    requestAnimationFrame(animateCursor);
+  }
+
+  function updateHoverState(event) {
+    const target = event.target.closest(hoverTargets);
+    cursor.classList.toggle("is-hover", Boolean(target));
+  }
+
+  window.addEventListener("mousemove", (event) => {
+    targetX = event.clientX;
+    targetY = event.clientY;
+    startCursor();
+    updateHoverState(event);
+  }, { passive: true });
+
+  window.addEventListener("mousedown", () => {
+    cursor.classList.add("is-pressed");
+  });
+
+  window.addEventListener("mouseup", () => {
+    cursor.classList.remove("is-pressed");
+  });
+
+  document.addEventListener("mouseleave", () => {
+    cursor.classList.remove("is-visible", "is-hover", "is-pressed");
+  });
+}
+
+initCustomCursor();

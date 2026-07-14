@@ -461,10 +461,16 @@ function initCustomCursor() {
     requestAnimationFrame(animateCursor);
   }
 
+  function updateHoverState(event) {
+    const target = event.target.closest(hoverTargets);
+    cursor.classList.toggle("is-hover", Boolean(target));
+  }
+
   window.addEventListener("mousemove", (event) => {
     targetX = event.clientX;
     targetY = event.clientY;
     startCursor();
+    updateHoverState(event);
   }, { passive: true });
 
   window.addEventListener("mousedown", () => {
@@ -473,18 +479,6 @@ function initCustomCursor() {
 
   window.addEventListener("mouseup", () => {
     cursor.classList.remove("is-pressed");
-  });
-
-  document.addEventListener("mouseover", (event) => {
-    if (event.target.closest(hoverTargets)) {
-      cursor.classList.add("is-hover");
-    }
-  });
-
-  document.addEventListener("mouseout", (event) => {
-    if (event.target.closest(hoverTargets)) {
-      cursor.classList.remove("is-hover");
-    }
   });
 
   document.addEventListener("mouseleave", () => {

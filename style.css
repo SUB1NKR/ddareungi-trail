@@ -21,7 +21,7 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
 /* =========================
    Smooth Custom Cursor - Dot & Line Only / Element Invert
    - 기본: 따릉이 그린 라인 + 따릉이 그린 점
-   - 상호작용 요소 hover: 면 없이 점과 라인만 유지, mix-blend-mode:difference로 대상 요소 색상과 시각적으로 반전
+   - 상호작용 요소 hover: 점·라인 구조 유지, 얇은 원 배경 추가, mix-blend-mode:difference로 대상 요소 색상과 시각적으로 반전
 ========================= */
 @media (hover: hover) and (pointer: fine) {
   body {
@@ -57,10 +57,10 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
     z-index: 20000;
     width: 38px;
     height: 38px;
-    border: 1.6px solid var(--cursor-line);
+    border: 2.4px solid var(--cursor-line);
     border-radius: 999px;
-    background: transparent;
-    box-shadow: none;
+    background: rgba(48, 226, 145, 0.07);
+    box-shadow: 0 0 0 1px rgba(48, 226, 145, 0.08);
     pointer-events: none;
     opacity: 0;
     transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
@@ -96,8 +96,8 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
     width: 62px;
     height: 62px;
     border-color: var(--cursor-invert);
-    background: transparent;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
     mix-blend-mode: difference;
   }
 

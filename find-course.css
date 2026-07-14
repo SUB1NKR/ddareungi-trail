@@ -13,11 +13,6 @@
    Smooth Custom Cursor
 ========================= */
 @media (hover: hover) and (pointer: fine) {
-  :root {
-    --cursor-color: #12ff8a;
-    --cursor-rgb: 18, 255, 138;
-  }
-
   body {
     cursor: none;
   }
@@ -41,15 +36,23 @@
   }
 
   .custom-cursor {
+    --cursor-normal: #00ff9d;
+    --cursor-normal-rgb: 0, 255, 157;
+    --cursor-invert-bg: #1e1e1e;
+    --cursor-invert-dot: #ffffff;
+
     position: fixed;
     left: 0;
     top: 0;
     z-index: 20000;
-    width: 36px;
-    height: 36px;
-    border: 1.5px solid rgba(var(--cursor-rgb), 1);
+    width: 38px;
+    height: 38px;
+    border: 1.75px solid rgba(var(--cursor-normal-rgb), 1);
     border-radius: 999px;
-    background: rgba(var(--cursor-rgb), 0.08);
+    background: rgba(var(--cursor-normal-rgb), 0.075);
+    box-shadow:
+      0 0 0 1px rgba(var(--cursor-normal-rgb), 0.16),
+      0 0 22px rgba(var(--cursor-normal-rgb), 0.22);
     pointer-events: none;
     opacity: 0;
     transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
@@ -58,6 +61,7 @@
       height 220ms ease,
       border-color 220ms ease,
       background-color 220ms ease,
+      box-shadow 220ms ease,
       opacity 160ms ease;
     will-change: transform;
   }
@@ -66,16 +70,15 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 999px;
-    background: var(--cursor-color);
+    background: var(--cursor-normal);
     transform: translate(-50%, -50%);
     transition:
       width 220ms ease,
       height 220ms ease,
-      background-color 220ms ease,
-      opacity 180ms ease;
+      background-color 220ms ease;
   }
 
   .custom-cursor.is-visible {
@@ -83,22 +86,25 @@
   }
 
   .custom-cursor.is-hover {
-    width: 76px;
-    height: 76px;
-    border-color: #ffffff;
-    background: #ffffff;
-    mix-blend-mode: difference;
+    width: 66px;
+    height: 66px;
+    border-color: var(--cursor-invert-bg);
+    background: var(--cursor-invert-bg);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.45),
+      0 18px 42px rgba(30, 30, 30, 0.22);
   }
 
   .custom-cursor.is-hover .custom-cursor__dot {
-    width: 0;
-    height: 0;
-    opacity: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--cursor-invert-dot);
   }
 
   .custom-cursor.is-pressed {
-    width: 46px;
-    height: 46px;
+    width: 30px;
+    height: 30px;
+    background: rgba(30, 30, 30, 0.86);
   }
 }
 

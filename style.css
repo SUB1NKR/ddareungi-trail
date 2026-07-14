@@ -118,3 +118,101 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
     display: none;
   }
 }
+
+
+/* =========================
+   2차 수정사항 반영
+========================= */
+.external-notice {
+  background: rgba(7, 16, 12, 0.26);
+  backdrop-filter: blur(10px);
+}
+
+.external-notice-card {
+  width: min(360px, calc(100vw - 48px));
+  min-height: 164px;
+  padding: 34px 56px 32px 30px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow: 0 28px 90px rgba(8, 25, 16, 0.18), inset 0 0 0 1px rgba(48, 226, 145, 0.10);
+  text-align: left;
+}
+
+.external-notice-card::before {
+  left: 30px;
+  top: 0;
+  width: 62px;
+  height: 5px;
+  background: #30E291;
+}
+
+.external-notice-eyebrow {
+  margin: 0 0 14px;
+  color: #156340;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.external-notice-card h2 {
+  margin: 0;
+  color: #1e1e1e;
+  font-size: 24px;
+  line-height: 1.32;
+  font-weight: 900;
+  word-break: keep-all;
+}
+
+.external-notice-description,
+.external-notice-actions,
+.notice-secondary,
+.notice-primary {
+  display: none !important;
+}
+
+.external-notice-close {
+  right: 16px;
+  top: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(21, 99, 64, 0.07);
+  color: #156340;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.external-notice-close:hover {
+  background: #156340;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor {
+    --cursor-line: #30E291;
+    --cursor-dot: #30E291;
+    --cursor-invert: #156340;
+  }
+
+  body.is-menu-open .custom-cursor,
+  body.is-menu-closing .custom-cursor {
+    --cursor-line: #FFFFFF;
+    --cursor-dot: #FFFFFF;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.10);
+  }
+
+  .custom-cursor.is-hover {
+    border-color: #156340;
+    background: rgba(21, 99, 64, 0.09);
+    box-shadow: 0 0 0 1px rgba(21, 99, 64, 0.12);
+    mix-blend-mode: difference;
+  }
+
+  .custom-cursor.is-hover .custom-cursor__dot {
+    background: #156340;
+  }
+}

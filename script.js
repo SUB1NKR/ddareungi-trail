@@ -20,7 +20,7 @@ const slideInterval = 2000;
 const totalLoadingTime = Math.max(slides.length * slideInterval, 1200);
 const menuDuration = 780;
 const introPlaySeconds = 2;
-const scrollScreens = 12;
+const scrollScreens = 18;
 const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 let currentSlideIndex = 0;
@@ -38,9 +38,17 @@ let ticking = false;
 let allowProgrammaticScroll = false;
 let isRestoringScroll = false;
 let lastGuideUpdateTime = 0;
+let externalNoticeTimer = null;
+let targetVideoTime = introPlaySeconds;
+let videoScrubRaf = null;
+const videoScrubEase = 0.105;
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - clamp(t, 0, 1), 3);
 }
 
 function clamp(value, min, max) {
@@ -67,15 +75,47 @@ function getScrubDuration() {
   return Math.max(mainVideo.duration - introPlaySeconds, 0);
 }
 
+function startVideoScrubEase() {
+  if (videoScrubRaf || !mainVideo) return;
+
+  const tick = () => {
+    if (!isPageReady || isVideoAutoPlaying || isMenuOpen || isMenuClosing || isModalOpen || !mainVideo) {
+      videoScrubRaf = null;
+      return;
+    }
+
+    const diff = targetVideoTime - mainVideo.currentTime;
+
+    if (Math.abs(diff) <= 0.012) {
+      mainVideo.currentTime = targetVideoTime;
+      videoScrubRaf = null;
+      return;
+    }
+
+    mainVideo.currentTime += diff * videoScrubEase;
+    videoScrubRaf = requestAnimationFrame(tick);
+  };
+
+  videoScrubRaf = requestAnimationFrame(tick);
+}
+
 function updateVideoByScroll() {
   if (!isPageReady || isVideoAutoPlaying || isMenuOpen || isMenuClosing || isModalOpen || !mainVideo) return;
+
   const scrubDuration = getScrubDuration();
   if (scrubDuration <= 0) return;
+
   const progress = getScrollProgress();
-  const targetTime = introPlaySeconds + progress * scrubDuration;
-  if (Math.abs(mainVideo.currentTime - targetTime) > 0.035) {
-    mainVideo.currentTime = targetTime;
+  const easedProgress = easeOutCubic(progress);
+
+  targetVideoTime = introPlaySeconds + easedProgress * scrubDuration;
+
+  if (progress >= 0.995) {
+    mainVideo.currentTime = targetVideoTime;
+  } else {
+    startVideoScrubEase();
   }
+
   updateEndCta(progress);
 }
 
@@ -198,12 +238,21 @@ function openExternalNotice(url) {
   pendingExternalUrl = url;
   isModalOpen = true;
   saveLockedScrollPosition();
+  clearTimeout(externalNoticeTimer);
   document.body.classList.add("is-modal-open");
   externalNotice?.classList.add("is-visible");
   externalNotice?.setAttribute("aria-hidden", "false");
+
+  externalNoticeTimer = setTimeout(() => {
+    if (!pendingExternalUrl) return;
+    const targetUrl = pendingExternalUrl;
+    pendingExternalUrl = "";
+    window.location.href = targetUrl;
+  }, 2000);
 }
 
 function closeExternalNotice() {
+  clearTimeout(externalNoticeTimer);
   pendingExternalUrl = "";
   isModalOpen = false;
   document.body.classList.remove("is-modal-open");
@@ -259,6 +308,7 @@ function finishIntroPlay() {
   mainVideo.pause();
   if (Number.isFinite(mainVideo.duration) && mainVideo.duration > introPlaySeconds) {
     mainVideo.currentTime = introPlaySeconds;
+    targetVideoTime = introPlaySeconds;
   }
   setScrollWithoutLock(0);
   lockedScrollY = 0;

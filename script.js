@@ -15,21 +15,20 @@ window.addEventListener('DOMContentLoaded', () => {
   const externalCancelButton = document.querySelector('#externalCancelButton');
   const externalMoveButton = document.querySelector('#externalMoveButton');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
-  const brandCursor = document.querySelector('#brandCursor');
 
   const slideInterval = 2000;
   const totalLoadingTime = Math.max(slides.length, 1) * slideInterval;
   const menuDuration = 780;
   const courseIndexUrl = 'https://www.sisul.or.kr/open_content/traffic/bike_course/index.html';
 
-  const frameCount = 2552;
+  const frameCount = 2440;
   const framePath = './assets/frames/';
   const framePrefix = 'frame_';
   const frameExtension = '.webp';
   const firstFrameIndex = 0;
   const autoPlayEndFrame = 70;
   const autoPlayDelay = 1000;
-  const autoPlayDuration = 2933;
+  const autoPlayDuration = 4400;
   const scrollStartFrame = autoPlayEndFrame;
   const maxDevicePixelRatio = 2;
 
@@ -221,18 +220,9 @@ window.addEventListener('DOMContentLoaded', () => {
   function toggleMenu() { if (isMenuOpen) closeMenu(); else openMenu(); }
   function moveToHome(event) { event.preventDefault(); if (isMenuOpen) { closeMenu(() => { window.location.href = './index.html?skipLoading=1'; }); return; } window.location.href = './index.html?skipLoading=1'; }
 
-  function initBrandCursor() {
-    if (!brandCursor || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    document.body.classList.add('has-custom-cursor');
-    window.addEventListener('mousemove', (event) => { brandCursor.classList.add('is-visible'); brandCursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`; });
-    window.addEventListener('mouseleave', () => brandCursor.classList.remove('is-visible'));
-    document.querySelectorAll('a, button, [role="button"]').forEach((element) => { element.addEventListener('mouseenter', () => brandCursor.classList.add('is-hover')); element.addEventListener('mouseleave', () => brandCursor.classList.remove('is-hover')); });
-  }
-
   function initPage() {
     saveLockedScrollPosition();
     startScrollProtection();
-    initBrandCursor();
     preloadFrames();
     resizeCanvas();
     setFrame(0);

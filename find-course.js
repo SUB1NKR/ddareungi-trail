@@ -12,6 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const questionCount = document.querySelector('#questionCount');
   const questionTitle = document.querySelector('#questionTitle');
   const answerList = document.querySelector('#answerList');
+  const resultImage = document.querySelector('#resultImage');
   const resultNumber = document.querySelector('#resultNumber');
   const resultName = document.querySelector('#resultName');
   const resultDescription = document.querySelector('#resultDescription');
@@ -22,7 +23,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const externalNotice = document.querySelector('#externalNotice');
   const externalCancelButton = document.querySelector('#externalCancelButton');
   const externalMoveButton = document.querySelector('#externalMoveButton');
-  const brandCursor = document.querySelector('#brandCursor');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
 
   const menuDuration = 780;
@@ -196,6 +196,10 @@ window.addEventListener('DOMContentLoaded', () => {
     resultSection.classList.remove('is-entering');
     resultSection.classList.add('is-visible');
     resultSection.style.setProperty('--result-bg-image', `url("${bestCourse.image}")`);
+    if (resultImage) {
+      resultImage.src = bestCourse.image;
+      resultImage.alt = `${bestCourse.id}번 코스 ${bestCourse.name}`;
+    }
     resultNumber.textContent = `${bestCourse.id}번 코스`;
     resultName.textContent = bestCourse.name;
     resultDescription.textContent = bestCourse.description;
@@ -214,7 +218,6 @@ window.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
   }
 
-  initBrandCursor();
 
   menuButton?.addEventListener('click', (event) => { event.preventDefault(); toggleMenu(); });
   startButton?.addEventListener('click', (event) => { event.preventDefault(); startRecommendation(); });

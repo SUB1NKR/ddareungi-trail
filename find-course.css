@@ -484,3 +484,35 @@ body {
     background-position: 0% 12%, 100% 0%, 50% 100%, center;
   }
 }
+
+/* 6차 수정사항: 결과 로딩/결과 화면 화이트 바탕 + 녹색 그라디언트 가시성 강화 */
+.finding-section,
+.result-section {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(48, 226, 145, 0.42), rgba(48, 226, 145, 0.12) 24%, transparent 42%),
+    radial-gradient(circle at 84% 28%, rgba(95, 244, 176, 0.38), rgba(95, 244, 176, 0.12) 26%, transparent 44%),
+    radial-gradient(circle at 52% 86%, rgba(48, 226, 145, 0.34), rgba(48, 226, 145, 0.1) 26%, transparent 46%),
+    linear-gradient(135deg, #ffffff 0%, #f8fffB 48%, #ffffff 100%);
+  background-size: 170% 170%, 190% 190%, 180% 180%, 100% 100%;
+  animation: vividGreenGradientFlow 18s ease-in-out infinite;
+}
+
+.result-section::before,
+.result-section::after {
+  animation: none;
+}
+
+@keyframes vividGreenGradientFlow {
+  0%, 100% {
+    background-position: 0% 8%, 100% 4%, 50% 100%, center;
+  }
+  25% {
+    background-position: 28% 0%, 76% 28%, 34% 82%, center;
+  }
+  50% {
+    background-position: 58% 26%, 44% 58%, 18% 58%, center;
+  }
+  75% {
+    background-position: 26% 62%, 82% 34%, 66% 74%, center;
+  }
+}

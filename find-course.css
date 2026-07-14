@@ -448,3 +448,39 @@ body {
     background-position: 100% 70%, 0% 20%, center;
   }
 }
+
+
+/* 5차 수정사항: 결과/로딩 화면 자연스러운 그라디언트 지속 애니메이션 */
+.finding-section,
+.result-section {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(48, 226, 145, 0.18), transparent 30%),
+    radial-gradient(circle at 88% 24%, rgba(176, 255, 218, 0.28), transparent 34%),
+    radial-gradient(circle at 52% 88%, rgba(48, 226, 145, 0.12), transparent 36%),
+    linear-gradient(135deg, #f7fff9 0%, #ffffff 48%, #ecfff6 100%);
+  background-size: 160% 160%, 180% 180%, 170% 170%, 100% 100%;
+  animation: softGradientFlow 28s linear infinite;
+}
+
+.result-section::before,
+.result-section::after {
+  animation: none;
+}
+
+@keyframes softGradientFlow {
+  0% {
+    background-position: 0% 12%, 100% 0%, 50% 100%, center;
+  }
+  25% {
+    background-position: 28% 0%, 76% 32%, 36% 82%, center;
+  }
+  50% {
+    background-position: 54% 28%, 48% 58%, 18% 60%, center;
+  }
+  75% {
+    background-position: 28% 56%, 76% 36%, 36% 82%, center;
+  }
+  100% {
+    background-position: 0% 12%, 100% 0%, 50% 100%, center;
+  }
+}

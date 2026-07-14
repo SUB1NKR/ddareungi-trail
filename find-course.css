@@ -864,3 +864,182 @@ body {
     right: 6%;
   }
 }
+
+
+/* 8차 수정사항: 코스 찾기 메인 문구/행간 보정 */
+.intro-kicker-v7 {
+  line-height: 1.34;
+  letter-spacing: -0.01em;
+  text-align: left;
+}
+
+.intro-copy-v7 h1 {
+  max-width: 760px;
+  line-height: 1.08;
+  letter-spacing: -0.048em;
+  word-break: keep-all;
+}
+
+.intro-description-v7 {
+  max-width: 680px;
+  line-height: 1.74;
+  letter-spacing: -0.018em;
+  word-break: keep-all;
+}
+
+/* 8차 수정사항: 결과/결과 로딩화면 녹색 그라디언트 옅게 조정 */
+.finding-section,
+.result-section {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(48, 226, 145, 0.34), rgba(48, 226, 145, 0.13) 24%, transparent 48%),
+    radial-gradient(circle at 88% 20%, rgba(87, 255, 187, 0.28), rgba(87, 255, 187, 0.11) 26%, transparent 50%),
+    radial-gradient(circle at 50% 94%, rgba(48, 226, 145, 0.26), rgba(48, 226, 145, 0.10) 28%, transparent 54%),
+    linear-gradient(135deg, #ffffff 0%, #f8fffb 48%, #ffffff 100%);
+  background-size: 165% 165%, 172% 172%, 176% 176%, 100% 100%;
+  animation: softGreenGradientFlow 14s ease-in-out infinite;
+}
+
+.finding-section::before,
+.result-section::before {
+  background:
+    linear-gradient(110deg, transparent 0%, rgba(48, 226, 145, 0.08) 46%, transparent 64%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.78), transparent 58%);
+  background-size: 190% 190%, 100% 100%;
+  animation: softGreenLightSweep 9s ease-in-out infinite;
+}
+
+@keyframes softGreenGradientFlow {
+  0%, 100% { background-position: 0% 8%, 100% 0%, 52% 100%, center; }
+  25% { background-position: 34% 4%, 70% 22%, 34% 78%, center; }
+  50% { background-position: 76% 34%, 36% 58%, 14% 52%, center; }
+  75% { background-position: 30% 74%, 94% 44%, 82% 72%, center; }
+}
+
+@keyframes softGreenLightSweep {
+  0%, 100% { background-position: -46% 50%, center; opacity: 0.34; }
+  50% { background-position: 126% 50%, center; opacity: 0.72; }
+}
+
+/* 8차 수정사항: 코스 결과 화면을 풀 스크린 노트형 레이아웃으로 확장 */
+.result-section {
+  min-height: 100vh;
+  padding: calc(var(--gnb-height) + 24px) clamp(24px, 4vw, 64px) clamp(24px, 4vw, 54px);
+  align-items: stretch;
+}
+
+.result-stage {
+  width: 100%;
+  min-height: calc(100vh - var(--gnb-height) - clamp(48px, 7vw, 118px));
+  display: grid;
+  grid-template-columns: minmax(420px, 0.92fr) minmax(520px, 1.08fr);
+  align-items: stretch;
+  gap: clamp(24px, 3.5vw, 54px);
+  padding: clamp(24px, 3.2vw, 46px);
+  border-radius: clamp(34px, 4vw, 58px);
+  background:
+    linear-gradient(90deg, rgba(48, 226, 145, 0.10) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(48, 226, 145, 0.08) 1px, transparent 1px),
+    rgba(255, 255, 255, 0.70);
+  background-size: 34px 34px;
+  border: 1px solid rgba(48, 226, 145, 0.18);
+  box-shadow: 0 34px 110px rgba(21, 26, 24, 0.11);
+  backdrop-filter: blur(18px);
+}
+
+.result-map-strip {
+  left: clamp(30px, 4vw, 64px);
+  right: clamp(30px, 4vw, 64px);
+  top: clamp(18px, 2.3vw, 34px);
+  opacity: 0.42;
+}
+
+.result-visual-card {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+  border-radius: clamp(28px, 3vw, 44px);
+  transform: rotate(-1.8deg);
+}
+
+.result-visual-card img {
+  height: 100%;
+}
+
+.result-note-card {
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+  padding: clamp(42px, 5vw, 76px);
+  border-radius: clamp(28px, 3vw, 44px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: rotate(1.2deg);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88)),
+    repeating-linear-gradient(180deg, transparent 0 35px, rgba(48, 226, 145, 0.09) 36px 37px);
+}
+
+.result-note-card::before {
+  left: clamp(26px, 3vw, 42px);
+  top: clamp(26px, 3vw, 42px);
+  bottom: clamp(26px, 3vw, 42px);
+}
+
+.result-note-card h2 {
+  max-width: 880px;
+  font-size: clamp(44px, 4.9vw, 82px);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+}
+
+.result-description {
+  max-width: 760px;
+  font-size: clamp(17px, 1.2vw, 21px);
+  line-height: 1.78;
+}
+
+.result-route-summary {
+  width: min(620px, 100%);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.result-tags {
+  max-width: 760px;
+}
+
+.result-actions {
+  margin-top: clamp(26px, 4vh, 52px);
+}
+
+@media (max-width: 900px) {
+  .intro-kicker-v7 { text-align: center; }
+  .intro-copy-v7 h1 { line-height: 1.12; }
+  .intro-description-v7 { line-height: 1.68; }
+  .result-section { padding: calc(var(--gnb-height) + 22px) 18px 34px; }
+  .result-stage {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    padding: 18px;
+    gap: 18px;
+  }
+  .result-visual-card,
+  .result-note-card {
+    min-height: auto;
+    transform: none;
+  }
+  .result-visual-card,
+  .result-visual-card img {
+    height: 320px;
+  }
+  .result-note-card {
+    padding: 34px 22px;
+  }
+  .result-note-card h2 {
+    font-size: clamp(36px, 10vw, 52px);
+  }
+  .result-route-summary {
+    grid-template-columns: 1fr;
+  }
+}

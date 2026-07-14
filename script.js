@@ -20,7 +20,7 @@ const slideInterval = 2000;
 const totalLoadingTime = Math.max(slides.length * slideInterval, 1200);
 const menuDuration = 780;
 const introPlaySeconds = 2;
-const scrollScreens = 18;
+const scrollScreens = 32;
 const courseIndexUrl = "https://www.sisul.or.kr/open_content/traffic/bike_course/index.html";
 
 let currentSlideIndex = 0;
@@ -43,8 +43,13 @@ let targetVideoTime = introPlaySeconds;
 let targetScrollProgress = 0;
 let easedScrollProgress = 0;
 let videoScrubRaf = null;
-const videoScrubEase = 0.085;
-const videoSeekThreshold = 0.018;
+let smoothScrollTargetY = 0;
+let smoothScrollCurrentY = 0;
+let smoothScrollRaf = null;
+const videoScrubEase = 0.055;
+const videoSeekThreshold = 0.006;
+const smoothScrollEase = 0.115;
+const wheelScrollMultiplier = 0.92;
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -60,6 +65,10 @@ function clamp(value, min, max) {
 
 function getScrollableDistance() {
   return window.innerHeight * scrollScreens;
+}
+
+function getMaxPageScroll() {
+  return Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
 }
 
 function updateScrollProxyHeight() {
@@ -100,12 +109,12 @@ function startVideoScrubEase() {
 
     const progressDiff = targetScrollProgress - easedScrollProgress;
 
-    if (Math.abs(progressDiff) <= 0.0008) {
+    if (Math.abs(progressDiff) <= 0.00055) {
       easedScrollProgress = targetScrollProgress;
       targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
 
       if (Math.abs(mainVideo.currentTime - targetVideoTime) > videoSeekThreshold) {
-        mainVideo.currentTime = targetVideoTime;
+        mainVideo.currentTime = clamp(targetVideoTime, introPlaySeconds, mainVideo.duration || targetVideoTime);
       }
 
       updateEndCta(easedScrollProgress);
@@ -113,13 +122,14 @@ function startVideoScrubEase() {
       return;
     }
 
-    // 사용자의 스크롤 위치를 곧바로 영상 시간에 꽂지 않고,
-    // 목표 지점까지 감속하듯 따라가게 만들어 툭툭 끊기는 느낌을 줄입니다.
+    // 스크롤 위치와 영상 시간을 동시에 부드럽게 보간합니다.
+    // wheel 입력 → smooth scroll → eased progress → video currentTime 순서로 처리해
+    // currentTime이 큰 폭으로 튀는 현상을 줄입니다.
     easedScrollProgress = clamp(easedScrollProgress + progressDiff * videoScrubEase, 0, 1);
     targetVideoTime = introPlaySeconds + easedScrollProgress * scrubDuration;
 
     if (Math.abs(mainVideo.currentTime - targetVideoTime) > videoSeekThreshold) {
-      mainVideo.currentTime = targetVideoTime;
+      mainVideo.currentTime = clamp(targetVideoTime, introPlaySeconds, mainVideo.duration || targetVideoTime);
     }
 
     updateEndCta(easedScrollProgress);
@@ -225,6 +235,74 @@ function restoreLockedScroll() {
   requestAnimationFrame(() => { isRestoringScroll = false; });
 }
 
+function canUseSmoothScroll() {
+  return isPageReady && !isVideoAutoPlaying && !isMenuOpen && !isMenuClosing && !isModalOpen;
+}
+
+function syncSmoothScrollPosition(y = window.scrollY) {
+  smoothScrollTargetY = clamp(y, 0, getMaxPageScroll());
+  smoothScrollCurrentY = smoothScrollTargetY;
+}
+
+function startSmoothScrollEase() {
+  if (smoothScrollRaf) return;
+
+  const tick = () => {
+    if (!canUseSmoothScroll()) {
+      smoothScrollRaf = null;
+      syncSmoothScrollPosition();
+      return;
+    }
+
+    const diff = smoothScrollTargetY - smoothScrollCurrentY;
+
+    if (Math.abs(diff) < 0.45) {
+      smoothScrollCurrentY = smoothScrollTargetY;
+      window.scrollTo(0, smoothScrollCurrentY);
+      smoothScrollRaf = null;
+      return;
+    }
+
+    smoothScrollCurrentY += diff * smoothScrollEase;
+    window.scrollTo(0, smoothScrollCurrentY);
+    smoothScrollRaf = requestAnimationFrame(tick);
+  };
+
+  smoothScrollRaf = requestAnimationFrame(tick);
+}
+
+function handleSmoothWheel(event) {
+  if (!canUseSmoothScroll()) return;
+
+  event.preventDefault();
+  smoothScrollTargetY = clamp(smoothScrollTargetY + event.deltaY * wheelScrollMultiplier, 0, getMaxPageScroll());
+  startSmoothScrollEase();
+}
+
+function handleSmoothKey(event) {
+  if (!canUseSmoothScroll()) return;
+
+  const keyMap = {
+    ArrowDown: window.innerHeight * 0.42,
+    PageDown: window.innerHeight * 0.86,
+    End: getMaxPageScroll(),
+    ArrowUp: -window.innerHeight * 0.42,
+    PageUp: -window.innerHeight * 0.86,
+    Home: -getMaxPageScroll(),
+    " ": event.shiftKey ? -window.innerHeight * 0.86 : window.innerHeight * 0.86
+  };
+
+  if (!(event.key in keyMap)) return;
+
+  event.preventDefault();
+
+  if (event.key === "Home") smoothScrollTargetY = 0;
+  else if (event.key === "End") smoothScrollTargetY = getMaxPageScroll();
+  else smoothScrollTargetY = clamp(smoothScrollTargetY + keyMap[event.key], 0, getMaxPageScroll());
+
+  startSmoothScrollEase();
+}
+
 function handlePageScroll() {
   if (ticking) return;
   ticking = true;
@@ -245,11 +323,14 @@ function startScrollProtection() {
   window.addEventListener("wheel", preventScrollInput, { passive: false });
   window.addEventListener("touchmove", preventScrollInput, { passive: false });
   window.addEventListener("keydown", preventScrollKey);
+  window.addEventListener("wheel", handleSmoothWheel, { passive: false });
+  window.addEventListener("keydown", handleSmoothKey);
   window.addEventListener("scroll", handlePageScroll, { passive: true });
 }
 
 function setScrollWithoutLock(y) {
   allowProgrammaticScroll = true;
+  syncSmoothScrollPosition(y);
   window.scrollTo(0, y);
   requestAnimationFrame(() => { allowProgrammaticScroll = false; });
 }
@@ -264,22 +345,25 @@ function openExternalNotice(url) {
   document.body.classList.add("is-modal-open");
 
   if (!externalNotice) {
-    externalNoticeTimer = setTimeout(() => window.location.assign(url), 2000);
+    externalNoticeTimer = setTimeout(() => {
+      window.location.href = url;
+    }, 2000);
     return;
   }
 
   externalNotice.style.display = "flex";
   externalNotice.setAttribute("aria-hidden", "false");
+  externalNotice.classList.remove("is-closing");
 
   requestAnimationFrame(() => {
     externalNotice.classList.add("is-visible");
   });
 
   externalNoticeTimer = setTimeout(() => {
-    if (!pendingExternalUrl) return;
     const targetUrl = pendingExternalUrl;
+    if (!targetUrl) return;
     pendingExternalUrl = "";
-    window.location.assign(targetUrl);
+    window.location.href = targetUrl;
   }, 2000);
 }
 
@@ -295,14 +379,15 @@ function closeExternalNotice() {
       if (!externalNotice.classList.contains("is-visible")) {
         externalNotice.style.display = "none";
       }
-    }, 280);
+    }, 260);
   }
 }
 
 function confirmExternalMove() {
-  if (!pendingExternalUrl) return closeExternalNotice();
   const url = pendingExternalUrl;
-  closeExternalNotice();
+  if (!url) return closeExternalNotice();
+  pendingExternalUrl = "";
+  clearTimeout(externalNoticeTimer);
   window.location.href = url;
 }
 
@@ -354,6 +439,7 @@ function finishIntroPlay() {
   setScrollWithoutLock(0);
   lockedScrollY = 0;
   lastScrollY = 0;
+  syncSmoothScrollPosition(0);
   isVideoAutoPlaying = false;
   isPageReady = true;
   document.body.classList.remove("is-video-autoplay");
@@ -473,6 +559,7 @@ function moveToHome(event) {
 
 function initPage() {
   updateScrollProxyHeight();
+  syncSmoothScrollPosition();
   saveLockedScrollPosition();
   startScrollProtection();
   const params = new URLSearchParams(window.location.search);
@@ -500,6 +587,7 @@ externalNotice?.addEventListener("click", (event) => {
 });
 window.addEventListener("resize", () => {
   updateScrollProxyHeight();
+  syncSmoothScrollPosition();
   updateVideoByScroll();
 }, { passive: true });
 

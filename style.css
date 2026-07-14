@@ -279,3 +279,165 @@ body.is-menu-open,body.is-menu-closing,body.is-modal-open,body.is-loading-locked
     background: #FFFFFF !important;
   }
 }
+
+/* =========================
+   4차 수정사항 최종 오버라이드
+   - 커서: 기본 따릉이 그린 / 상호작용 #156340 + difference 반전
+   - 메뉴: 기본 #FFFFFF + difference 반전
+   - 외부 이동 안내: NOTICE, 문구, X 버튼만 사용
+========================= */
+.external-notice {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 16, 12, 0.24);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 260ms ease, visibility 0s linear 260ms;
+}
+
+.external-notice.is-visible {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 260ms ease, visibility 0s;
+}
+
+.external-notice-card {
+  position: relative;
+  width: min(368px, calc(100vw - 48px));
+  min-height: 158px;
+  padding: 36px 58px 34px 30px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(247,255,250,0.95));
+  border: 1px solid rgba(255,255,255,0.82);
+  box-shadow: 0 30px 86px rgba(8,25,16,0.18), inset 0 0 0 1px rgba(48,226,145,0.12);
+  text-align: left;
+  overflow: hidden;
+}
+
+.external-notice-card::before {
+  content: "";
+  position: absolute;
+  left: 30px;
+  top: 0;
+  width: 68px;
+  height: 5px;
+  border-radius: 999px;
+  background: #30E291;
+}
+
+.external-notice-eyebrow {
+  margin: 0 0 14px;
+  color: #156340;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.external-notice-card h2 {
+  margin: 0;
+  color: #1e1e1e;
+  font-size: 24px;
+  line-height: 1.32;
+  font-weight: 900;
+  word-break: keep-all;
+  text-wrap: balance;
+}
+
+.external-notice-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(21,99,64,0.08);
+  color: #156340;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.external-notice-close:hover {
+  background: #156340;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.external-notice-description,
+.external-notice-actions,
+.notice-secondary,
+.notice-primary {
+  display: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor {
+    --cursor-line: #30E291;
+    --cursor-dot: #30E291;
+    width: 42px;
+    height: 42px;
+    border: 2.4px solid #30E291 !important;
+    background: rgba(48,226,145,0.055) !important;
+    box-shadow: 0 0 0 1px rgba(48,226,145,0.08) !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .custom-cursor .custom-cursor__dot {
+    width: 6px;
+    height: 6px;
+    background: #30E291 !important;
+  }
+
+  .custom-cursor.is-hover {
+    border-color: #156340 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: difference !important;
+  }
+
+  .custom-cursor.is-hover .custom-cursor__dot {
+    background: #156340 !important;
+  }
+
+  body.is-menu-open .custom-cursor,
+  body.is-menu-closing .custom-cursor {
+    border-color: #FFFFFF !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: difference !important;
+  }
+
+  body.is-menu-open .custom-cursor .custom-cursor__dot,
+  body.is-menu-closing .custom-cursor .custom-cursor__dot {
+    background: #FFFFFF !important;
+  }
+
+  body.is-menu-open .custom-cursor.is-hover,
+  body.is-menu-closing .custom-cursor.is-hover {
+    border-color: #FFFFFF !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    mix-blend-mode: difference !important;
+  }
+
+  body.is-menu-open .custom-cursor.is-hover .custom-cursor__dot,
+  body.is-menu-closing .custom-cursor.is-hover .custom-cursor__dot {
+    background: #FFFFFF !important;
+  }
+}

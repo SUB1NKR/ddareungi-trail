@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const firstFrameIndex = 0;
   const autoPlayEndFrame = 70;
   const autoPlayDelay = 1000;
-  const autoPlayDuration = 2200;
+  const autoPlayDuration = 4400;
   const scrollStartFrame = autoPlayEndFrame;
   const maxDevicePixelRatio = 2;
 

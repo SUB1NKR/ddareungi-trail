@@ -16,7 +16,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const externalMoveButton = document.querySelector('#externalMoveButton');
   const courseIndexExternalLink = document.querySelector('#courseIndexExternalLink');
   const endCtaScene = document.querySelector('.end-cta-scene');
-  const brandCursor = document.querySelector('#brandCursor');
 
   const slideInterval = 2000;
   const totalLoadingTime = Math.max(slides.length, 1) * slideInterval;
@@ -37,7 +36,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const ctx = sequenceCanvas ? sequenceCanvas.getContext('2d') : null;
   const frameImages = new Array(frameCount);
   const frameState = { frame: scrollStartFrame };
-  const smoothScrollFrameState = { frame: scrollStartFrame };
 
   let currentSlideIndex = 0;
   let slideTimer = null;
@@ -126,33 +124,6 @@ window.addEventListener('DOMContentLoaded', () => {
     updateEndCta();
   }
 
-  function renderScrollFrame(index) {
-    const safeIndex = clamp(Math.round(index), 0, frameCount - 1);
-    if (safeIndex === currentFrameIndex) return;
-    currentFrameIndex = safeIndex;
-    frameState.frame = safeIndex;
-    drawFrame(safeIndex);
-    updateEndCta();
-  }
-
-  function setFrameWithScrollEase(index) {
-    const targetFrame = clamp(Math.round(index), scrollStartFrame, frameCount - 1);
-
-    if (!window.gsap) {
-      renderScrollFrame(targetFrame);
-      smoothScrollFrameState.frame = targetFrame;
-      return;
-    }
-
-    gsap.to(smoothScrollFrameState, {
-      frame: targetFrame,
-      duration: 0.48,
-      ease: 'power2.inOut',
-      overwrite: true,
-      onUpdate: () => renderScrollFrame(smoothScrollFrameState.frame)
-    });
-  }
-
   function updateEndCta() {
     if (!endCta) return;
     if (currentFrameIndex >= frameCount - 1) { endCta.classList.add('is-visible'); endCta.setAttribute('aria-hidden', 'false'); hideScrollGuide(); return; }
@@ -185,12 +156,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function setupScrollTrigger() {
     if (!window.gsap || !window.ScrollTrigger || !scrollProxy) {
-      window.addEventListener('scroll', () => { if (!isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return; const progress = getScrollProgress(); const frameIndex = scrollStartFrame + Math.round(progress * (frameCount - 1 - scrollStartFrame)); setFrameWithScrollEase(frameIndex); });
+      window.addEventListener('scroll', () => { if (!isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return; const progress = getScrollProgress(); const frameIndex = scrollStartFrame + Math.round(progress * (frameCount - 1 - scrollStartFrame)); setFrame(frameIndex); });
       return;
     }
     gsap.registerPlugin(ScrollTrigger);
     if (scrollTriggerInstance) { scrollTriggerInstance.kill(); scrollTriggerInstance = null; }
-    scrollTriggerInstance = ScrollTrigger.create({ trigger: scrollProxy, start: 'top top', end: 'bottom bottom', scrub: 0.65, onUpdate: (self) => { if (!isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return; const frameIndex = scrollStartFrame + Math.round(self.progress * (frameCount - 1 - scrollStartFrame)); setFrameWithScrollEase(frameIndex); } });
+    scrollTriggerInstance = ScrollTrigger.create({ trigger: scrollProxy, start: 'top top', end: 'bottom bottom', scrub: true, onUpdate: (self) => { if (!isPageReady || isAutoPlaying || isMenuOpen || isMenuClosing) return; const frameIndex = scrollStartFrame + Math.round(self.progress * (frameCount - 1 - scrollStartFrame)); setFrame(frameIndex); } });
   }
 
   function hideExternalNotice() { clearTimeout(externalMoveTimer); externalMoveTimer = null; pendingExternalUrl = ''; externalNotice?.classList.remove('is-visible'); externalNotice?.setAttribute('aria-hidden', 'true'); }
@@ -226,7 +197,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function finishFrameAutoPlay() {
     setFrame(autoPlayEndFrame);
-    smoothScrollFrameState.frame = autoPlayEndFrame;
     setScrollWithoutLock(0);
     lockedScrollY = 0;
     lastScrollY = 0;
@@ -270,37 +240,9 @@ window.addEventListener('DOMContentLoaded', () => {
     endCtaScene.style.setProperty('--cta-parallax-y', '0px');
   }
 
-
-  function updateBrandCursor(event) {
-    if (!brandCursor) return;
-    brandCursor.style.setProperty('--cursor-x', `${event.clientX}px`);
-    brandCursor.style.setProperty('--cursor-y', `${event.clientY}px`);
-    brandCursor.classList.add('is-visible');
-  }
-
-  function hideBrandCursor() {
-    brandCursor?.classList.remove('is-visible');
-  }
-
-  function updateCursorHoverState(event) {
-    const hoverTarget = event.target.closest?.('a, button, .menu-link, .menu-sns-link');
-    document.body.classList.toggle('is-cursor-hover', Boolean(hoverTarget));
-  }
-
-  function initBrandCursor() {
-    if (!brandCursor || !window.matchMedia('(pointer: fine)').matches) return;
-    window.addEventListener('mousemove', updateBrandCursor);
-    window.addEventListener('mouseout', hideBrandCursor);
-    document.addEventListener('mouseover', updateCursorHoverState);
-    document.addEventListener('mouseout', updateCursorHoverState);
-    document.addEventListener('mousedown', () => document.body.classList.add('is-cursor-down'));
-    document.addEventListener('mouseup', () => document.body.classList.remove('is-cursor-down'));
-  }
-
   function initPage() {
     saveLockedScrollPosition();
     startScrollProtection();
-    initBrandCursor();
     preloadFrames();
     resizeCanvas();
     setFrame(0);

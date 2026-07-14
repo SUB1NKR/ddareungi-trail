@@ -695,3 +695,73 @@ a,
     width: min(420px, 86vw);
   }
 }
+
+/* 1차 수정사항 반영: 진입 가이드 카드, 로딩 배경, 타이틀 줄 수 제한 */
+.loading-page {
+  display: block;
+}
+
+.loading-page.is-visible {
+  display: block;
+}
+
+.loading-page:not(.is-visible) .loading-page__fill {
+  width: 0%;
+}
+
+.entry-popup__dim {
+  background: rgba(30, 30, 30, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.entry-popup__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(760px, calc(100vw - 64px));
+  aspect-ratio: 16 / 9;
+  min-height: 420px;
+  max-height: min(560px, calc(100vh - 64px));
+  padding: clamp(34px, 5vw, 56px);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.entry-popup__title,
+.external-notice__title,
+.end-cta__title,
+.menu-panel__link {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.entry-popup__title {
+  max-width: 620px;
+  font-size: clamp(34px, 4.8vw, 56px);
+  line-height: 1.08;
+}
+
+.entry-popup__desc {
+  max-width: 560px;
+}
+
+.end-cta__title {
+  max-width: 460px;
+}
+
+@media (max-width: 768px) {
+  .entry-popup__card {
+    width: min(480px, calc(100vw - 40px));
+    aspect-ratio: 4 / 3;
+    min-height: auto;
+    max-height: calc(100vh - 40px);
+    padding: 30px 24px;
+    border-radius: 26px;
+  }
+
+  .entry-popup__title {
+    font-size: clamp(28px, 8vw, 38px);
+  }
+}
